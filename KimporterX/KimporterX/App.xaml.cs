@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FreshMvvm;
+using System;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
@@ -6,11 +7,12 @@ namespace KimporterX
 {
     public partial class App : Application
     {
+        public const string JsonStrKey = "JsonStrKey";
         public App()
         {
             InitializeComponent();
 
-            MainPage = new MainPage();
+            MainPage = FreshPageModelResolver.ResolvePageModel<MainPageModel>();
         }
 
         protected override void OnStart()
