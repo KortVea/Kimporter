@@ -13,11 +13,11 @@ namespace DataProcessor.Models
         public Double Latitude { get; set; }
         public Double Longitude { get; set; }
         public Double Milage { get; set; }
-        public bool MilageSpecified { get; set; }
+        public bool MilageSpecified => Milage == 0.0 ? false : true;
         public Double Heading { get; set; }
-        public bool HeadingSpecified { get; set; }
+        public bool HeadingSpecified => Heading == 0.0 ? false : true;
         public int Speed { get; set; }
-        public bool SpeedSpecified { get; set; }
+        public bool SpeedSpecified => Speed == 0 ? false : true;
         public bool WasProcessed { get; set; }
         public int NumberOfProperties { get; set; }
         public Int64 Hash { get; set; }

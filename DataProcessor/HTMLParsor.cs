@@ -9,9 +9,9 @@ using DataProcessor.Helpers;
 
 namespace DataProcessor
 {
-    public static class HTMLStringParsor
+    internal static class HTMLStringParsor
     {
-        public static FeatureDescriptionBindingModel Parse(string html)
+        internal static FeatureDescriptionBindingModel Parse(string html)
         {
             var htmlDoc = new HtmlDocument();
             htmlDoc.LoadHtml(html);
