@@ -5,9 +5,9 @@ using System.Text.RegularExpressions;
 
 namespace DataProcessor.Helpers
 {
-    public static class InnerTextExtention
+    internal static class InnerTextExtention
     {
-        public static string TrimInnerText(this string input)
+        internal static string TrimInnerText(this string input)
         {
             input = input.Trim();
             var ptn = @"\r\n\s+";

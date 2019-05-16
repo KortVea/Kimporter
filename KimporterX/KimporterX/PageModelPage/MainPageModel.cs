@@ -56,7 +56,8 @@ namespace KimporterX
         public bool CanExecuteCommand => false;
         public string OpenButtonText { get; set; } = "Open ...";
         public string ConnStrJson { get; set; }
-        public string ConnStrJsonPlaceHolder =>  @"example json";
+        public string ConnStrJsonPlaceHolder => "{ 'local db' : 'Server=localhost;Database=Tester;Trusted_Connection=True;', \n'Azure Test': '...', \n ... }";
+
 
 
 
