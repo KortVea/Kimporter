@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -12,13 +12,6 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Helpers\t4db.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>t4db.cs</LastGenOutput>
-    </None>
   </ItemGroup>
 
 </Project>

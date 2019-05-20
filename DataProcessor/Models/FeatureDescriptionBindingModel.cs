@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using DataProcessor.Helpers;
 using Newtonsoft.Json;
 
 namespace DataProcessor.Models
@@ -14,7 +15,8 @@ namespace DataProcessor.Models
         public string EquipmentId { get; set; }
 
         [JsonProperty(PropertyName = "Date")]
-        public DateTime Date { get; set; }
+        [JsonConverter(typeof(DMYDateTimeConverter))]
+        public DateTime Time { get; set; }
 
         [JsonProperty(PropertyName = "Location")]
         public string Location { get; set; }
@@ -34,13 +36,12 @@ namespace DataProcessor.Models
         [JsonProperty(PropertyName = "Exceeded fuel level difference limit")]
         public float ExceededFLDLimit { get; set; }
 
-        [JsonProperty(PropertyName = "Time")]
-        public DateTime Time { get; set; }
-
         [JsonProperty(PropertyName = "Fuel level percentage")]
         public float FuelLevelPercentage { get; set; }
 
         [JsonProperty(PropertyName = "Difference in fuel level")]
         public float DiffFuelLevel { get; set; }
+
+        public Dictionary<string, string> DownloadedPropertyData { get; set; }
     }
 }

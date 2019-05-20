@@ -6,11 +6,16 @@ using DataProcessor.Models;
 using System.IO;
 using Newtonsoft.Json;
 using DataProcessor.Helpers;
+using System.Linq;
+using System.Reflection;
 
 namespace DataProcessor
 {
     internal static class HTMLStringParsor
     {
+        private static readonly string[] TraceKeys = typeof(FeatureDescriptionBindingModel).GetProperties()
+                                            .Select(i => i.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName)
+                                            .ToArray();
         internal static FeatureDescriptionBindingModel Parse(string html)
         {
             var htmlDoc = new HtmlDocument();
@@ -18,8 +23,10 @@ namespace DataProcessor
 
             var ths = htmlDoc.DocumentNode.SelectNodes("//th");
             var tds = htmlDoc.DocumentNode.SelectNodes("//td");
+
             string json;
-            //var dic = new Directory<string, object>();
+            var propertyData = new Dictionary<string, string>();
+
             using (var memStream = new MemoryStream())
             using (var sw = new StreamWriter(memStream))
             using (var sr = new StreamReader(memStream))
@@ -27,10 +34,20 @@ namespace DataProcessor
                 sw.Write('{');
                 for (int i = 0; i < ths.Count; i++)
                 {
-                    sw.Write($"'{ths[i].InnerText.TrimInnerText()}':'{tds[i].InnerText.TrimInnerText()}'");
-                    if (i < ths.Count - 1)
+                    var key = ths[i].InnerText.TrimInnerText();
+                    var value = tds[i].InnerText.TrimInnerText();
+                    if (TraceKeys.Contains(key))
                     {
-                        sw.Write(',');
+                        sw.Write($"'{key}':'{value}'");
+                        if (i < TraceKeys.Count() - 1)
+                        {
+                            sw.Write(',');
+                        }
+                    }
+                    else
+                    {
+                        propertyData.Add(key, value);
+
                     }
                 }
                 sw.Write('}');
@@ -38,7 +55,9 @@ namespace DataProcessor
                 memStream.Seek(0, SeekOrigin.Begin);
                 json = sr.ReadToEnd();
             }
-            return JsonConvert.DeserializeObject<FeatureDescriptionBindingModel>(json);
+            var traceData = JsonConvert.DeserializeObject<FeatureDescriptionBindingModel>(json);
+            traceData.DownloadedPropertyData = propertyData;
+            return traceData;
         }
     }
 }
