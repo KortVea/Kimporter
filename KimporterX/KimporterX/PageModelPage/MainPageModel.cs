@@ -5,6 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
+using DataProcessor;
+using DataProcessor.Models;
+using System.Collections.ObjectModel;
 
 namespace KimporterX
 {
@@ -25,6 +28,14 @@ namespace KimporterX
 
         }
 
+        private async Task WritingKMLTraceAndProperties()
+        {
+            if (KMLTraceData.Count > 0)
+            {
+
+            }
+        }
+
         private async Task GetKML()
         {
             try
@@ -32,8 +43,12 @@ namespace KimporterX
                 var fileData = await CrossFilePicker.Current.PickFile();
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
-                var contents = Encoding.UTF8.GetString(fileData.DataArray);
-
+                if (!fileData.FileName.EndsWith(".kml"))
+                {
+                    await CoreMethods.DisplayAlert("File Extension", "Please choose a .kml file.", "OK");
+                    return;
+                }
+                KMLTraceData = new ObservableCollection<DownloadedTraceData>(KMLParsor.Parse(fileData.FilePath));
             }
             catch (Exception ke)
             {
@@ -48,6 +63,8 @@ namespace KimporterX
             OpenButtonText = "Open ...";
         }
 
+
+        public ObservableCollection<DownloadedTraceData> KMLTraceData { get; set; } = new ObservableCollection<DownloadedTraceData>();
         public ICommand ManageCommand { get; set; }
         public ICommand OpenCommand { get; set; }
         public ICommand SaveConfigCommand { get; set; }
