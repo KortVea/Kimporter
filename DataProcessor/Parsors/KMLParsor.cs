@@ -11,21 +11,21 @@ namespace DataProcessor
 {
     public static class KMLParsor
     {
-        public static IEnumerable<DownloadedTraceData> Parse(string path)
+        public static IEnumerable<DownloadedTraceData> Parse(Stream stream)
         {
             try
             {
-                using (var fs = File.OpenRead(path))
-                {
-                    var parser = new Parser();
-                    parser.Parse(fs);
+                //using (var fs = File.OpenRead(path))
+                //{
+                var parser = new Parser();
+                parser.Parse(stream);
 
-                    var root = (Kml)parser.Root;
-                    var doc = (Document)root.Feature;
-                    var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
-                    var trace = pointsFolder.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
-                    return trace;
-                }
+                var root = (Kml)parser.Root;
+                var doc = (Document)root.Feature;
+                var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
+                var trace = pointsFolder?.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
+                return trace;
+                //}
             }
             catch (Exception)
             {

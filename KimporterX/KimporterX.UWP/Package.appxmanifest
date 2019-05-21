@@ -51,9 +51,9 @@
   </Applications>
 
   <Capabilities>
+    <rescap:Capability Name="broadFileSystemAccess"/>
     <Capability Name="internetClient" />
     <uap:Capability Name="enterpriseAuthentication"/>
-    <rescap:Capability Name="broadFileSystemAccess"/>
     <Capability Name="privateNetworkClientServer"/>
   </Capabilities>
 </Package>
