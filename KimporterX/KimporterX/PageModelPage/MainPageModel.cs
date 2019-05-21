@@ -29,15 +29,18 @@ namespace KimporterX
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
             {
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
+                HandleConnStr(ConnStrJson);
             }
 
         }
 
-        private void HandleConnStr(object str)
+        private void HandleConnStr(object input)
         {
             try
             {
-                connStrDictionary = ConnStrJsonParsor.Parse(str as string);
+                var str = input as string;
+                connStrDictionary = ConnStrJsonParsor.Parse(str);
+                Application.Current.Properties[App.JsonStrKey] = str;
             }
             catch (Exception je)
             {
@@ -94,13 +97,13 @@ namespace KimporterX
 
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());
-        public ObservableCollection<string> ConnStrSource => new ObservableCollection<string>(connStrDictionary.Values);
+        public ObservableCollection<string> ConnStrSource => new ObservableCollection<string>(connStrDictionary.Keys);
         public ICommand ManageCommand { get; set; }
         public ICommand OpenCommand { get; set; }
         public ICommand SaveConfigCommand { get; set; }
         public ICommand ExecuteCommand { get; set; }
         public bool IsManaging { get; set; }
-        public bool CanExecuteCommand => false;
+        public bool CanExecuteWriting => false;
         public string OpenButtonText { get; set; } = "Open ...";
         public string ConnStrJson { get; set; }
         public string ConnStrJsonPlaceHolder =>
