@@ -19,15 +19,32 @@ namespace KimporterX
         {
             IsManaging = false;
             ManageCommand = new Command(() => IsManaging = !IsManaging);
-            OpenCommand = new FreshAwaitCommand(async (tcs) => {
+            OpenCommand = new FreshAwaitCommand(async (tcs) =>
+            {
                 await GetKML();
                 tcs.SetResult(true);
             });
+            SaveConfigCommand = new Command(HandleConnStr);
+
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
             {
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
             }
 
+        }
+
+        private void HandleConnStr(object str)
+        {
+            try
+            {
+                connStrDictionary = ConnStrJsonParsor.Parse(str as string);
+            }
+            catch (Exception je)
+            {
+                CoreMethods.DisplayAlert("Json Format", $"{je.Message}", "OK");
+                connStrDictionary = new Dictionary<string, string>();
+            }
+            UpdateBindableProperties();
         }
 
         private async Task WritingKMLTraceAndProperties()
@@ -42,7 +59,7 @@ namespace KimporterX
         {
             try
             {
-                var fileData = await CrossFilePicker.Current.PickFile(new string[] {".kml" });
+                var fileData = await CrossFilePicker.Current.PickFile(new string[] { ".kml" });
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
                 kmlTraceData = KMLParsor.Parse(fileData.GetStream());
@@ -50,14 +67,13 @@ namespace KimporterX
                 {
                     await CoreMethods.DisplayAlert("File Contents", "No trace data were found from the file. Looking for Folder \"Trace points\" and Placemark tags.", "OK");
                 }
-                UpdateBindableProperties();
-
             }
             catch (Exception ke)
             {
                 await CoreMethods.DisplayAlert("Error", ke.Message, "OK");
                 ResetControls();
             }
+            UpdateBindableProperties();
 
         }
 
@@ -65,6 +81,7 @@ namespace KimporterX
         {
             RaisePropertyChanged("KMLLifeSignTraceData");
             RaisePropertyChanged("KMLNonLifeSignTraceData");
+            RaisePropertyChanged("ConnStrSource");
         }
 
         private void ResetControls()
@@ -72,10 +89,12 @@ namespace KimporterX
             OpenButtonText = "Open ...";
         }
 
-
         private IEnumerable<DownloadedTraceData> kmlTraceData = new List<DownloadedTraceData>();
+        private Dictionary<string, string> connStrDictionary = new Dictionary<string, string>();
+
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());
+        public ObservableCollection<string> ConnStrSource => new ObservableCollection<string>(connStrDictionary.Values);
         public ICommand ManageCommand { get; set; }
         public ICommand OpenCommand { get; set; }
         public ICommand SaveConfigCommand { get; set; }

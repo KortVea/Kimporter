@@ -64,7 +64,8 @@
                         FontFamily="Courier-New"
                         VerticalOptions="FillAndExpand"/>
                 <Button Text="Validate &amp; Save"
-                        Command="{Binding SaveConfigCommand}"/>
+                        Command="{Binding SaveConfigCommand}"
+                        CommandParameter="{Binding ConnStrJson}"/>
             </StackLayout>
         </Frame>
 

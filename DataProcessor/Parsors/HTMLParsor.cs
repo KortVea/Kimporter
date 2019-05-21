@@ -31,8 +31,9 @@ namespace DataProcessor
             using (var sw = new StreamWriter(memStream))
             using (var sr = new StreamReader(memStream))
             {
+                var safeBoundary = Math.Min(ths.Count, tds.Count);
                 sw.Write('{');
-                for (int i = 0; i < ths.Count; i++)
+                for (int i = 0; i < safeBoundary; i++)
                 {
                     var key = ths[i].InnerText.TrimInnerText();
                     var value = tds[i].InnerText.TrimInnerText();
