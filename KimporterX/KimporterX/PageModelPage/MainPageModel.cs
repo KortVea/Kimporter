@@ -18,7 +18,10 @@ namespace KimporterX
             IsManaging = false;
             ManageCommand = new Command(() => IsManaging = !IsManaging);
             OpenCommand = new FreshAwaitCommand(async (tcs) => {
+                //var test = await Repo.GetFullTrace();
+                //var tes = Repo.GetAllTraces();
                 await GetKML();
+                
                 tcs.SetResult(true);
             });
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
@@ -40,15 +43,16 @@ namespace KimporterX
         {
             try
             {
-                var fileData = await CrossFilePicker.Current.PickFile();
+                var fileData = await CrossFilePicker.Current.PickFile(new string[] {".kml" });
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
-                if (!fileData.FileName.EndsWith(".kml"))
-                {
-                    await CoreMethods.DisplayAlert("File Extension", "Please choose a .kml file.", "OK");
-                    return;
-                }
+                //if (!fileData.FileName.EndsWith(".kml"))
+                //{
+                //    await CoreMethods.DisplayAlert("File Extension", "Please choose a .kml file.", "OK");
+                //    return;
+                //}
                 KMLTraceData = new ObservableCollection<DownloadedTraceData>(KMLParsor.Parse(fileData.FilePath));
+
             }
             catch (Exception ke)
             {
@@ -73,7 +77,20 @@ namespace KimporterX
         public bool CanExecuteCommand => false;
         public string OpenButtonText { get; set; } = "Open ...";
         public string ConnStrJson { get; set; }
-        public string ConnStrJsonPlaceHolder => "{ 'local db' : 'Server=localhost;Database=Tester;Trusted_Connection=True;', \n'Azure Test': '...', \n ... }";
+        public string ConnStrJsonPlaceHolder =>
+@"//To connect to local SQL Server, make sure:
+//0. DownloadedTraceData table and DownloadedPropertyData table are created according to their 
+//schemas on your local SQL server.
+//1. Protocols for SQLEXPRESS is installed in Computer Management brower, and its TCP/IP protoal 
+is enabled
+//2. SQL Server Brower is running in Service brower
+//reference: https://docs.microsoft.com/en-us/windows/uwp/data-access/sql-server-databases
+#trouble-connecting-to-your-database
+
+//Put all your connections here. The keys will be displayed in the dropdown list above.
+{ 'Local Test' : 'Server=localhost;Database=Tester;Trusted_Connection=True;',
+'Azure Test': '...', 
+'Azure Production X': '...' }";
 
 
 

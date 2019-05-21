@@ -60,7 +60,7 @@
                         HorizontalOptions="Start"/>
                 <Editor Text="{Binding ConnStrJson}"
                         Placeholder="{Binding ConnStrJsonPlaceHolder}"
-                        PlaceholderColor="DarkGreen"
+                        PlaceholderColor="DimGray"
                         FontFamily="Courier-New"
                         VerticalOptions="FillAndExpand"/>
                 <Button Text="Validate &amp; Save"

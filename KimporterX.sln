@@ -11,7 +11,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KimporterX.iOS", "Kimporter
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KimporterX", "KimporterX\KimporterX\KimporterX.csproj", "{76A2B443-96EA-4F5B-8AA7-72B10C2D2E41}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataProcessor", "DataProcessor\DataProcessor.csproj", "{1EACBA7E-9E23-4206-94E9-30C3859B2246}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataProcessor", "DataProcessor\DataProcessor.csproj", "{1EACBA7E-9E23-4206-94E9-30C3859B2246}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

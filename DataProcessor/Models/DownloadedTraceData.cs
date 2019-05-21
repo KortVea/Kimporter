@@ -3,14 +3,14 @@ using System.Collections.Generic;
 
 namespace DataProcessor.Models
 {
-    public partial class DownloadedTraceData
+    public partial class DownloadedTraceData: EntityBase
     {
         public DownloadedTraceData()
         {
             DownloadedPropertyData = new HashSet<DownloadedPropertyData>();
         }
 
-        public Guid Id { get; set; }
+        
         public int Type { get; set; }
         public DateTime Time { get; set; }
         public string Source { get; set; }
