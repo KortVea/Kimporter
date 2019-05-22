@@ -34,7 +34,7 @@
         <Label Grid.Row="1" Grid.Column="0" Text="Connection String"/>
         <StackLayout Grid.Row="1" Grid.Column="1"
                      Orientation="Horizontal">
-            <Picker SelectedItem="{Binding SelectedConnStr}" 
+            <Picker SelectedItem="{Binding SelectedConnStrKey}" 
                     ItemsSource="{Binding ConnStrSource}"
                     HorizontalOptions="FillAndExpand"
                     BackgroundColor="Khaki"/>
@@ -69,11 +69,11 @@
             </StackLayout>
         </Frame>
 
-        <Button Text="Execute" FontSize="Large" BackgroundColor="LavenderBlush" 
+        <Button Text="{Binding ExecuteButtonText}" FontSize="Large" BackgroundColor="LavenderBlush" 
                 HorizontalOptions="Center" VerticalOptions="Center"
                 Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                 Command="{Binding ExecuteCommand}"
-                IsEnabled="{Binding CanExecuteWriting}"
+                IsEnabled="{Binding IsBusy, Converter={StaticResource inverter}}"
                 IsVisible="{Binding IsManaging, Converter={StaticResource inverter}}"/>
     </Grid>
     

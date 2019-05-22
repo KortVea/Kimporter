@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Plugin.FilePicker;
 using System.Collections.Generic;
+using DataProcessor.DAL;
 
 namespace KimporterX
 {
@@ -19,12 +20,16 @@ namespace KimporterX
         {
             IsManaging = false;
             ManageCommand = new Command(() => IsManaging = !IsManaging);
+
             OpenCommand = new FreshAwaitCommand(async (tcs) =>
             {
                 await GetKML();
                 tcs.SetResult(true);
             });
+
             SaveConfigCommand = new Command(HandleConnStr);
+
+            ExecuteCommand = new Command(async ()=> await WritingKMLTraceAndProperties());
 
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
             {
@@ -52,10 +57,25 @@ namespace KimporterX
 
         private async Task WritingKMLTraceAndProperties()
         {
-            if (kmlTraceData.Count() > 0)
+            IsBusy = true;
+            IEnumerable<DownloadedTraceData> dataToWrite;
+            switch (SelectedTypeIndex)
             {
-
+                case 0: dataToWrite = KMLLifeSignTraceData; break;
+                case 1: dataToWrite = KMLNonLifeSignTraceData; break;
+                case 2: dataToWrite = kmlTraceData; break;
+                default: return;
             }
+            var totalCount = dataToWrite.Count();
+            if (totalCount > 0)
+            {
+                var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
+                await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite, 
+                    new Progress<int>((count) => {
+                        ExecuteButtonText = $"{count} / {totalCount}";
+                    }));
+            }
+            IsBusy = false;
         }
 
         private async Task GetKML()
@@ -98,6 +118,7 @@ namespace KimporterX
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());
         public ObservableCollection<string> ConnStrSource => new ObservableCollection<string>(connStrDictionary.Keys);
+        public string SelectedConnStrKey { get; set; }
         public ICommand ManageCommand { get; set; }
         public ICommand OpenCommand { get; set; }
         public ICommand SaveConfigCommand { get; set; }
@@ -105,7 +126,10 @@ namespace KimporterX
         public bool IsManaging { get; set; }
         public bool CanExecuteWriting => false;
         public string OpenButtonText { get; set; } = "Open ...";
+        public string ExecuteButtonText { get; set; } = "Execute";
         public string ConnStrJson { get; set; }
+        public int SelectedTypeIndex { get; set; } = -1;
+        public bool IsBusy { get; set; }
         public string ConnStrJsonPlaceHolder =>
 @"//Put all your connections here. The keys will be displayed in the dropdown list above.
 {'Local Test' : 'Server=localhost;Database=Tester;Trusted_Connection=True;',
