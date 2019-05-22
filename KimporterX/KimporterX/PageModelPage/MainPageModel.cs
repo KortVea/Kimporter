@@ -21,7 +21,13 @@ namespace KimporterX
             IsManaging = false;
             ResetControls();
 
-            ManageCommand = new Command(() => IsManaging = !IsManaging);
+            ManageCommand = new Command(() => {
+                IsManaging = !IsManaging;
+                if (!IsManaging)
+                {
+                    HandleConnStr(ConnStrJson);
+                }
+            });
 
             OpenCommand = new FreshAwaitCommand(async (tcs) =>
             {
@@ -70,11 +76,18 @@ namespace KimporterX
             var totalCount = dataToWrite.Count();
             if (totalCount > 0)
             {
-                var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
-                await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite, 
-                    new Progress<int>((count) => {
-                        ExecuteButtonText = $"{count} / {totalCount}";
-                    }));
+                try
+                {
+                    var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
+                    await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
+                        new Progress<int>((count) => {
+                            ExecuteButtonText = $"{count} / {totalCount}";
+                        }));
+                }
+                catch (Exception de)
+                {
+                    await CoreMethods.DisplayAlert("Database", $"{de.Message}", "OK");
+                }
             }
             IsBusy = false;
         }
