@@ -15,8 +15,6 @@ namespace DataProcessor
         {
             try
             {
-                //using (var fs = File.OpenRead(path))
-                //{
                 var parser = new Parser();
                 parser.Parse(stream);
 
@@ -25,7 +23,6 @@ namespace DataProcessor
                 var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
                 var trace = pointsFolder?.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
                 return trace;
-                //}
             }
             catch (Exception)
             {
@@ -59,13 +56,16 @@ namespace DataProcessor
                 Source = "N/A",
                 Latitude = (pm.Geometry as Point).Coordinate.Latitude,
                 Longitude = (pm.Geometry as Point).Coordinate.Longitude,
-                Milage = description.Milage,
+                Milage = description.Milage,//todo: unit transform
+                //MilageSpecified = des,
                 Heading = 0,
+                //HeadingSpecified = ,
                 Speed = Convert.ToInt32(description.Speed),
+                //SpeedSpecified = ,
                 WasProcessed = false,
-                NumberOfProperties = 0,
-                DownloadedPropertyData = propData
-                //OutOfSync = true
+                NumberOfProperties = propData.Count(),
+                DownloadedPropertyData = propData,
+                OutOfSync = true
             };
             
             result.Hash = Hashing.CreateHash(result);//not here but 

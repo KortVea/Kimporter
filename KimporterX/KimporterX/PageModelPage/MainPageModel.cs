@@ -19,6 +19,8 @@ namespace KimporterX
         public MainPageModel()
         {
             IsManaging = false;
+            ResetControls();
+
             ManageCommand = new Command(() => IsManaging = !IsManaging);
 
             OpenCommand = new FreshAwaitCommand(async (tcs) =>
@@ -36,7 +38,6 @@ namespace KimporterX
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
                 HandleConnStr(ConnStrJson);
             }
-
         }
 
         private void HandleConnStr(object input)
@@ -125,7 +126,7 @@ namespace KimporterX
         public ICommand SaveConfigCommand { get; set; }
         public ICommand ExecuteCommand { get; set; }
         public bool IsManaging { get; set; }
-        public string OpenButtonText { get; set; } = "Open ...";
+        public string OpenButtonText { get; set; }
         public string ExecuteButtonText { get; set; } = "Execute";
         public string ConnStrJson { get; set; }
         public int SelectedTypeIndex { get; set; } = -1;
@@ -135,23 +136,23 @@ namespace KimporterX
             kmlTraceData.Count() > 0 &&
             connStrDictionary.Count > 0 &&
             SelectedConnStrKey != null;
-            //connStrDictionary.ContainsKey(SelectedConnStrKey);
         public string ConnStrJsonPlaceHolder =>
-@"//Put all your connections here. The keys will be displayed in the dropdown list above.
+@"//Put all your connection strings as Json object here. 
+//The keys will be displayed in the dropdown list above.
 
 {'Local Test' : 'Server=localhost;Database=Tester;Trusted_Connection=True;',
 'Azure Test': '...', 
 'Azure Production X': '...'}
 
-//To connect to local SQL Server, make sure:
+//Troubleshooting:
 //0. Privacy Setting - File System - this app is enabled
 //1. DownloadedTraceData table and DownloadedPropertyData table are created according to their 
 //schemas on your local SQL server.
 //2. Protocols for SQLEXPRESS is installed in Computer Management brower, and its TCP/IP protoal 
 is enabled
 //3. SQL Server Brower is running in Service brower
-//reference: https://docs.microsoft.com/en-us/windows/uwp/data-access/sql-server-databases
-#trouble-connecting-to-your-database";
+
+//reference: https://docs.microsoft.com/en-us/windows/uwp/data-access/sql-server-databases#trouble-connecting-to-your-database";
 
 
 

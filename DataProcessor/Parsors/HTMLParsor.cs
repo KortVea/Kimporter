@@ -16,6 +16,7 @@ namespace DataProcessor
         private static readonly string[] TraceKeys = typeof(FeatureDescriptionBindingModel).GetProperties()
                                             .Select(i => i.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName)
                                             .ToArray();
+
         internal static FeatureDescriptionBindingModel Parse(string html)
         {
             var htmlDoc = new HtmlDocument();
@@ -48,7 +49,6 @@ namespace DataProcessor
                     else
                     {
                         propertyData.Add(key, value);
-
                     }
                 }
                 sw.Write('}');
