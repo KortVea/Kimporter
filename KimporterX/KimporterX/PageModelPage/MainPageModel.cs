@@ -87,6 +87,7 @@ namespace KimporterX
                 catch (Exception de)
                 {
                     await CoreMethods.DisplayAlert("Database", $"{de.Message}", "OK");
+                    ResetControls();
                 }
             }
             IsBusy = false;
@@ -125,6 +126,7 @@ namespace KimporterX
         private void ResetControls()
         {
             OpenButtonText = "Open ...";
+            ExecuteButtonText = "Execute";
         }
 
         private IEnumerable<DownloadedTraceData> kmlTraceData = new List<DownloadedTraceData>();
@@ -140,7 +142,7 @@ namespace KimporterX
         public ICommand ExecuteCommand { get; set; }
         public bool IsManaging { get; set; }
         public string OpenButtonText { get; set; }
-        public string ExecuteButtonText { get; set; } = "Execute";
+        public string ExecuteButtonText { get; set; }
         public string ConnStrJson { get; set; }
         public int SelectedTypeIndex { get; set; } = -1;
         public bool IsBusy { get; set; }
