@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 
 namespace DataProcessor.Models
 {
+    [Table("DownloadedTraceData")]
     public partial class DownloadedTraceData: EntityBase
     {
         public DownloadedTraceData()
@@ -27,6 +29,7 @@ namespace DataProcessor.Models
         public long Hash { get; set; }
         public bool? OutOfSync { get; set; }
 
+        [Write(false)]
         public virtual ICollection<DownloadedPropertyData> DownloadedPropertyData { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace DataProcessor.DAL
         }
         public async Task<IEnumerable<DownloadedTraceData>> GetFullTraces()
         {
-            string sql = @"SELECT * FROM [DownloadedTraceData] AS A " +
+            string sql = @"SELECT * FROM DownloadedTraceData AS A " +
                          @"LEFT JOIN DownloadedPropertyData AS B " +
                          @"ON B.TraceDataId = A.Id";
             using (var conn = new SqlConnection(_connStr))
@@ -47,6 +47,8 @@ namespace DataProcessor.DAL
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<int> progress = null)
         {
             var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
+            var sqlInsertIntoTrace = $@"INSERT INTO {nameof(DownloadedTraceData) }";
+            var sqlInsertIntoProp = $@"";
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
@@ -76,7 +78,7 @@ namespace DataProcessor.DAL
                         }
                         trans.Commit();
                     }
-                    catch (Exception)
+                    catch (Exception et)
                     {
                         trans.Rollback();
                         throw;
