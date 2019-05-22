@@ -105,6 +105,7 @@ namespace KimporterX
             RaisePropertyChanged("KMLLifeSignTraceData");
             RaisePropertyChanged("KMLNonLifeSignTraceData");
             RaisePropertyChanged("ConnStrSource");
+            RaisePropertyChanged("CanExecuteWriting");
         }
 
         private void ResetControls()
@@ -124,24 +125,31 @@ namespace KimporterX
         public ICommand SaveConfigCommand { get; set; }
         public ICommand ExecuteCommand { get; set; }
         public bool IsManaging { get; set; }
-        public bool CanExecuteWriting => false;
         public string OpenButtonText { get; set; } = "Open ...";
         public string ExecuteButtonText { get; set; } = "Execute";
         public string ConnStrJson { get; set; }
         public int SelectedTypeIndex { get; set; } = -1;
         public bool IsBusy { get; set; }
+        public bool CanExecuteWriting => !IsBusy &&
+            SelectedTypeIndex != -1 &&
+            kmlTraceData.Count() > 0 &&
+            connStrDictionary.Count > 0 &&
+            SelectedConnStrKey != null;
+            //connStrDictionary.ContainsKey(SelectedConnStrKey);
         public string ConnStrJsonPlaceHolder =>
 @"//Put all your connections here. The keys will be displayed in the dropdown list above.
+
 {'Local Test' : 'Server=localhost;Database=Tester;Trusted_Connection=True;',
 'Azure Test': '...', 
 'Azure Production X': '...'}
 
 //To connect to local SQL Server, make sure:
-//0. DownloadedTraceData table and DownloadedPropertyData table are created according to their 
+//0. Privacy Setting - File System - this app is enabled
+//1. DownloadedTraceData table and DownloadedPropertyData table are created according to their 
 //schemas on your local SQL server.
-//1. Protocols for SQLEXPRESS is installed in Computer Management brower, and its TCP/IP protoal 
+//2. Protocols for SQLEXPRESS is installed in Computer Management brower, and its TCP/IP protoal 
 is enabled
-//2. SQL Server Brower is running in Service brower
+//3. SQL Server Brower is running in Service brower
 //reference: https://docs.microsoft.com/en-us/windows/uwp/data-access/sql-server-databases
 #trouble-connecting-to-your-database";
 

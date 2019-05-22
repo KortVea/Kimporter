@@ -10,7 +10,7 @@ namespace DataProcessor.Models
             DownloadedPropertyData = new HashSet<DownloadedPropertyData>();
         }
 
-        
+
         public int Type { get; set; }
         public DateTime Time { get; set; }
         public string Source { get; set; }

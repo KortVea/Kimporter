@@ -46,7 +46,7 @@ namespace DataProcessor.DAL
 
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<int> progress = null)
         {
-            var sqlHashExists = @"SELECT COUNT(1) FROM [DownloadedTraceData] WHERE Hash = @hash";
+            var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
@@ -62,15 +62,15 @@ namespace DataProcessor.DAL
                                 tempCount++;
                                 progress.Report(tempCount);
                             }
-                            var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash });
+                            var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash }, transaction: trans);
                             if (existing)
                             {
                                 continue;
                             }
                             else
                             {
-                                await conn.InsertAsync(item);
-                                await conn.InsertAsync(item.DownloadedPropertyData);
+                                await conn.InsertAsync(item, trans);
+                                await conn.InsertAsync(item.DownloadedPropertyData, trans);
                             }
                             
                         }
