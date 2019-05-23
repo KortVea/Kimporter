@@ -1,11 +1,10 @@
 ﻿using Dapper.Contrib.Extensions;
 using System;
-using System.Collections.Generic;
 
 namespace DataProcessor.Models
 {
     [Table("DownloadedPropertyData")]
-    public partial class DownloadedPropertyData: EntityBase
+    public partial class DownloadedPropertyData : EntityBase
     {
         public string PropertyKey { get; set; }
         public string PropertyValue { get; set; }

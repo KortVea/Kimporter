@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HtmlAgilityPack;
+﻿using DataProcessor.Helpers;
 using DataProcessor.Models;
-using System.IO;
+using HtmlAgilityPack;
 using Newtonsoft.Json;
-using DataProcessor.Helpers;
+using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 

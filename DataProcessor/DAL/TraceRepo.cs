@@ -15,11 +15,12 @@ namespace DataProcessor.DAL
         public TraceRepo(string connStr): base(connStr)
         {
         }
+
         public async Task<IEnumerable<DownloadedTraceData>> GetFullTraces()
         {
-            string sql = @"SELECT * FROM DownloadedTraceData AS A " +
-                         @"LEFT JOIN DownloadedPropertyData AS B " +
-                         @"ON B.TraceDataId = A.Id";
+            string sql = $@"SELECT * FROM {nameof(DownloadedTraceData)} AS A 
+                         LEFT JOIN {nameof(DownloadedPropertyData)} AS B 
+                         ON B.TraceDataId = A.Id";
             using (var conn = new SqlConnection(_connStr))
             {
                 var tracePropDic = new Dictionary<Guid, DownloadedTraceData>();
@@ -39,7 +40,6 @@ namespace DataProcessor.DAL
                         return traceEntry;
                     }).ContinueWith(i => i.Result.Distinct().ToList());
 
-
                 return traces;
             }
         }
@@ -47,8 +47,6 @@ namespace DataProcessor.DAL
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<int> progress = null)
         {
             var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
-            var sqlInsertIntoTrace = $@"INSERT INTO {nameof(DownloadedTraceData) }";
-            var sqlInsertIntoProp = $@"";
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
@@ -78,7 +76,7 @@ namespace DataProcessor.DAL
                         }
                         trans.Commit();
                     }
-                    catch (Exception et)
+                    catch (Exception)
                     {
                         trans.Rollback();
                         throw;

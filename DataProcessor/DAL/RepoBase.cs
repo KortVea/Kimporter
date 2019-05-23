@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Dapper.Contrib.Extensions;
 using DataProcessor.Models;
-using Dapper;
+using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
-using Dapper.Contrib.Extensions;
 
 namespace DataProcessor.DAL
 {
@@ -17,7 +15,7 @@ namespace DataProcessor.DAL
             _connStr = connStr;
         }
 
-        public async Task<int> InsertAllAsync(IEnumerable<T> list) 
+        public async Task<int> InsertAllAsync(IEnumerable<T> list)
         {
             using (var conn = new SqlConnection(_connStr))
             {

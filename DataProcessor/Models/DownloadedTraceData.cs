@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace DataProcessor.Models
 {
     [Table("DownloadedTraceData")]
-    public partial class DownloadedTraceData: EntityBase
+    public partial class DownloadedTraceData : EntityBase
     {
         public DownloadedTraceData()
         {

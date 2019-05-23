@@ -1,16 +1,15 @@
-﻿using FreshMvvm;
+﻿using DataProcessor;
+using DataProcessor.DAL;
+using DataProcessor.Models;
+using FreshMvvm;
+using Plugin.FilePicker;
 using System;
-using System.Text;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
-using DataProcessor;
-using DataProcessor.Models;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Plugin.FilePicker;
-using System.Collections.Generic;
-using DataProcessor.DAL;
 
 namespace KimporterX
 {
@@ -21,7 +20,8 @@ namespace KimporterX
             IsManaging = false;
             ResetControls();
 
-            ManageCommand = new Command(() => {
+            ManageCommand = new Command(() =>
+            {
                 IsManaging = !IsManaging;
                 if (!IsManaging)
                 {
@@ -37,7 +37,7 @@ namespace KimporterX
 
             SaveConfigCommand = new Command(HandleConnStr);
 
-            ExecuteCommand = new Command(async ()=> await WritingKMLTraceAndProperties());
+            ExecuteCommand = new Command(async () => await WritingKMLTraceAndProperties());
 
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
             {
@@ -80,7 +80,8 @@ namespace KimporterX
                 {
                     var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
                     await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
-                        new Progress<int>((count) => {
+                        new Progress<int>((count) =>
+                        {
                             ExecuteButtonText = $"{count} / {totalCount}";
                         }));
                 }

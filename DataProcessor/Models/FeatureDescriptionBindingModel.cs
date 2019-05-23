@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DataProcessor.Helpers;
+﻿using DataProcessor.Helpers;
 using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
 
 namespace DataProcessor.Models
 {

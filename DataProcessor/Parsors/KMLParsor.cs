@@ -1,11 +1,11 @@
-﻿using System;
-using SharpKml.Dom;
+﻿using DataProcessor.Helpers;
 using DataProcessor.Models;
 using SharpKml.Base;
+using SharpKml.Dom;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
-using DataProcessor.Helpers;
 
 namespace DataProcessor
 {
@@ -67,7 +67,7 @@ namespace DataProcessor
                 DownloadedPropertyData = propData,
                 OutOfSync = true
             };
-            
+
             result.Hash = Hashing.CreateHash(result);//not here but 
             return result;
         }

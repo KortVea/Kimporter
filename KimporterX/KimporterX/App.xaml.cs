@@ -1,7 +1,5 @@
 ﻿using FreshMvvm;
-using System;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace KimporterX
 {
