@@ -15,7 +15,7 @@
         </ResourceDictionary>
     </ContentPage.Resources>
     <ScrollView>
-        <Grid Margin="10">
+        <Grid Margin="10" IsEnabled="{Binding IsBusy, Converter={StaticResource inverter}}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -29,17 +29,17 @@
 
             <Label Grid.Row="0" Grid.Column="0" Text="KML File to Import"/>
             <Button Grid.Row="0" Grid.Column="1" Text="{Binding OpenButtonText}" 
-                Command="{Binding OpenCommand}" BackgroundColor="Aquamarine"/>
+                    Command="{Binding OpenCommand}" BackgroundColor="Aquamarine"/>
 
             <Label Grid.Row="1" Grid.Column="0" Text="Connection String"/>
             <StackLayout Grid.Row="1" Grid.Column="1"
-                     Orientation="Horizontal">
-                <Picker SelectedItem="{Binding SelectedConnStrKey}" 
-                    ItemsSource="{Binding ConnStrSource}"
-                    HorizontalOptions="FillAndExpand"
-                    BackgroundColor="Khaki"/>
+                         Orientation="Horizontal">
+                <Picker SelectedItem="{Binding SelectedConnStrKey}"
+                        ItemsSource="{Binding ConnStrSource}"
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="Khaki"/>
                 <Button Text="Manage" Command="{Binding ManageCommand}" 
-                    Margin="8,0,0,0" BackgroundColor="LightCoral"/>
+                        Margin="8,0,0,0" BackgroundColor="LightCoral"/>
             </StackLayout>
 
             <Label Grid.Row="2" Grid.Column="0" Text="Data Type to Import"/>
@@ -51,30 +51,43 @@
                 </Picker.Items>
             </Picker>
 
-            <Frame BorderColor="LightGray" CornerRadius="8" Margin="8"
-               Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-               IsVisible="{Binding IsManaging}"
-               Opacity="1">
+            <Frame CornerRadius="8" Margin="8"
+                   Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                   IsVisible="{Binding IsManaging}"
+                   Opacity="1" BackgroundColor="LightGray">
                 <StackLayout>
                     <Label Text="ConnectionStringConfig.JSON"
-                        HorizontalOptions="Start"/>
+                           HorizontalOptions="Start"/>
                     <Editor Text="{Binding ConnStrJson}"
-                        Placeholder="{Binding ConnStrJsonPlaceHolder}"
-                        PlaceholderColor="DimGray"
-                        FontFamily="Courier-New"
-                        VerticalOptions="FillAndExpand"/>
+                            Placeholder="{Binding ConnStrJsonPlaceHolder}"
+                            PlaceholderColor="DimGray"
+                            FontFamily="Courier-New"
+                            VerticalOptions="FillAndExpand"/>
                     <Button Text="Validate &amp; Save"
-                        Command="{Binding SaveConfigCommand}"
-                        CommandParameter="{Binding ConnStrJson}"/>
+                            BackgroundColor="BlueViolet" TextColor="FloralWhite"
+                            Command="{Binding SaveConfigCommand}"
+                            CommandParameter="{Binding ConnStrJson}"/>
                 </StackLayout>
             </Frame>
 
-            <Button Text="{Binding ExecuteButtonText}" FontSize="Large" BackgroundColor="LavenderBlush" 
-                HorizontalOptions="Center" VerticalOptions="Center"
-                Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
-                Command="{Binding ExecuteCommand}"
-                IsEnabled="{Binding CanExecuteWriting}}"
-                IsVisible="{Binding IsManaging, Converter={StaticResource inverter}}"/>
+            <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                  IsVisible="{Binding IsManaging, Converter={StaticResource inverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Button Text="{Binding ExecuteButtonText}" 
+                        FontSize="Large" BackgroundColor="LavenderBlush" 
+                        HorizontalOptions="Center" VerticalOptions="Center"
+                        Command="{Binding ExecuteCommand}"
+                        IsEnabled="{Binding CanExecuteWriting}"/>
+                <Label Text="{Binding TimerText}"
+                       FontAttributes="Italic"
+                       FontSize="Medium"
+                       TextColor="YellowGreen"
+                       HorizontalOptions="End"
+                       VerticalOptions="End"/>
+            </Grid>
         </Grid>
     </ScrollView>
 </ContentPage>

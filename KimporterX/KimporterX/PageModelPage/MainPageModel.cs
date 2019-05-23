@@ -6,6 +6,7 @@ using Plugin.FilePicker;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -44,6 +45,7 @@ namespace KimporterX
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
                 HandleConnStr(ConnStrJson);
             }
+            
         }
 
         private void HandleConnStr(object input)
@@ -64,7 +66,13 @@ namespace KimporterX
 
         private async Task WritingKMLTraceAndProperties()
         {
+            stopWatch.Restart();
             IsBusy = true;
+            Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+            {
+                TimerText = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
+                return IsBusy;
+            });
             IEnumerable<DownloadedTraceData> dataToWrite;
             switch (SelectedTypeIndex)
             {
@@ -92,6 +100,7 @@ namespace KimporterX
                 }
             }
             IsBusy = false;
+            stopWatch.Stop();
         }
 
         private async Task GetKML()
@@ -128,10 +137,12 @@ namespace KimporterX
         {
             OpenButtonText = "Open ...";
             ExecuteButtonText = "Execute";
+            TimerText = string.Empty;
         }
 
         private IEnumerable<DownloadedTraceData> kmlTraceData = new List<DownloadedTraceData>();
         private Dictionary<string, string> connStrDictionary = new Dictionary<string, string>();
+        private Stopwatch stopWatch = new Stopwatch();
 
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());
@@ -147,6 +158,7 @@ namespace KimporterX
         public string ConnStrJson { get; set; }
         public int SelectedTypeIndex { get; set; } = -1;
         public bool IsBusy { get; set; }
+        public string TimerText { get; set; }
         public bool CanExecuteWriting => !IsBusy &&
             SelectedTypeIndex != -1 &&
             kmlTraceData.Count() > 0 &&
