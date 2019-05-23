@@ -37,13 +37,14 @@
                 <Picker SelectedItem="{Binding SelectedConnStrKey}"
                         ItemsSource="{Binding ConnStrSource}"
                         HorizontalOptions="FillAndExpand"
-                        BackgroundColor="Khaki"/>
+                        BackgroundColor="LightPink"/>
                 <Button Text="Manage" Command="{Binding ManageCommand}" 
                         Margin="8,0,0,0" BackgroundColor="LightCoral"/>
             </StackLayout>
 
             <Label Grid.Row="2" Grid.Column="0" Text="Data Type to Import"/>
-            <Picker Grid.Row="2" Grid.Column="1" SelectedIndex="{Binding SelectedTypeIndex}">
+            <Picker Grid.Row="2" Grid.Column="1" BackgroundColor="Gold"
+                    SelectedIndex="{Binding SelectedTypeIndex}">
                 <Picker.Items>
                     <x:String>LifeSign Only</x:String>
                     <x:String>Non-LifeSign Only</x:String>

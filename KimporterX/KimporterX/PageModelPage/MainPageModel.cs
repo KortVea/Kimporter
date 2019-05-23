@@ -161,7 +161,7 @@ namespace KimporterX
         public string TimerText { get; set; }
         public bool CanExecuteWriting => !IsBusy &&
             SelectedTypeIndex != -1 &&
-            kmlTraceData.Count() > 0 &&
+            kmlTraceData?.Count() > 0 &&
             connStrDictionary.Count > 0 &&
             SelectedConnStrKey != null;
         public string ConnStrJsonPlaceHolder =>
