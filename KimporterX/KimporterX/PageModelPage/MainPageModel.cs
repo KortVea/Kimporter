@@ -88,9 +88,16 @@ namespace KimporterX
                 {
                     var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
                     await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
-                        new Progress<int>((count) =>
+                        new Progress<Tuple<int, string>>((info) =>
                         {
-                            ExecuteButtonText = $"{count} / {totalCount}";
+                            if(info.Item2 == string.Empty)
+                            {
+                                ExecuteButtonText = $"{info.Item1} / {totalCount}";
+                            }
+                            else
+                            {
+
+                            }
                         }));
                 }
                 catch (Exception de)

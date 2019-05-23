@@ -10,9 +10,9 @@ using DataProcessor.Models;
 
 namespace DataProcessor.DAL
 {
-    public class TraceRepo: RepoBase<DownloadedTraceData>
+    public class TraceRepo : RepoBase<DownloadedTraceData>
     {
-        public TraceRepo(string connStr): base(connStr)
+        public TraceRepo(string connStr) : base(connStr)
         {
         }
 
@@ -44,7 +44,20 @@ namespace DataProcessor.DAL
             }
         }
 
-        public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<int> progress = null)
+        public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress = null, bool eagerLoadingHash = true, DateTime? start = null, DateTime? end = null)
+        {
+            if (eagerLoadingHash)
+            {
+                await InsertWithQueryAllFirst(list, progress, start, end);
+            }
+            else
+            {
+                await InsertWithQueryOneByOne(list, progress);
+            }
+
+        }
+
+        private async Task InsertWithQueryOneByOne(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress)
         {
             var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
             using (var conn = new SqlConnection(_connStr))
@@ -60,7 +73,7 @@ namespace DataProcessor.DAL
                             if (progress != null)
                             {
                                 tempCount++;
-                                progress.Report(tempCount);
+                                progress.Report(new Tuple<int, string>(tempCount, string.Empty));
                             }
                             var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash }, transaction: trans);
                             if (existing)
@@ -72,7 +85,6 @@ namespace DataProcessor.DAL
                                 await conn.InsertAsync(item, trans);
                                 await conn.InsertAsync(item.DownloadedPropertyData, trans);
                             }
-                            
                         }
                         trans.Commit();
                     }
@@ -81,11 +93,18 @@ namespace DataProcessor.DAL
                         trans.Rollback();
                         throw;
                     }
-                    
                 }
-
             }
         }
 
+        private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress, DateTime? start, DateTime? end)
+        {
+            var sqlHashRange = ;
+            using (var conn = new SqlConnection(_connStr))
+            {
+                await conn.OpenAsync();
+                //actually query with a date range,
+            }
+        }
     }
 }
