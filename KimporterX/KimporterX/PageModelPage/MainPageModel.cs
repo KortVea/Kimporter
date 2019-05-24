@@ -87,8 +87,10 @@ namespace KimporterX
                 try
                 {
                     var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
+                    var endFiltered = dataToWrite.Max(i => i.Time);
                     await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
-                        new Progress<DbProgressInfo>(HandleDbProgressInfo));
+                        new Progress<DbProgressInfo>(HandleDbProgressInfo),
+                        end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered);
                 }
                 catch (Exception de)
                 {

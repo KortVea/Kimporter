@@ -45,11 +45,11 @@ namespace DataProcessor.DAL
         }
 
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null,
-                                                                    bool eagerLoadingHash = true, DateTime? start = null, DateTime? end = null)
+                                                                    bool eagerLoadingHash = true, DateTime? end = null)
         {
             if (eagerLoadingHash)
             {
-                await InsertWithQueryAllFirst(list, progress, start, end);
+                await InsertWithQueryAllFirst(list, progress, end);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace DataProcessor.DAL
                                 Number2 = totalCount
                             });
                         }
-                        //check Hash against DB
+                        //check each item's Hash against DB
                         var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash });
                         if (existing)
                         {
@@ -113,17 +113,15 @@ namespace DataProcessor.DAL
             }
         }
 
-        private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress, DateTime? start, DateTime? end)
+        private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress, DateTime? end)
         {
-            var sqlHashRange = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)}";
             var sqlHashCount = $@"SELECT COUNT(*) FROM {nameof(DownloadedTraceData)}";
             var sqlHashPage = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)} ORDER BY [Hash] OFFSET @offset ROWS FETCH NEXT @batchSize ROWS ONLY";
             var sqlDatePredicate = string.Empty;
 
-            if (start.HasValue && end.HasValue)
+            if (end.HasValue)
             {
-                sqlDatePredicate = $@" WHERE [Time] < {end.Value.ToString("yyyy-MM-dd")} AND [Time] >= {start.Value.ToString("yyyy-MM-dd")}";
-                sqlHashRange += sqlDatePredicate;
+                sqlDatePredicate = $@" WHERE [Time] < {end.Value.ToString("yyyy-MM-dd")}";
                 sqlHashCount += sqlDatePredicate;
             }
 
@@ -167,7 +165,7 @@ namespace DataProcessor.DAL
                         Number1 = tempCount,
                         Number2 = totalCount
                     });
-                    if (hashList.Contains(item.Hash))
+                    if (!hashList.Contains(item.Hash))
                     {
                         using (var trans = conn.BeginTransaction())
                         {
