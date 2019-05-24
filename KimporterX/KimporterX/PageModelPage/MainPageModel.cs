@@ -149,7 +149,7 @@ namespace KimporterX
                 ResetControls();
             }
             UpdateBindableProperties();
-
+            KMLInfoText = $"Life-sign trace count: {KMLLifeSignTraceData.Count()}\nNon-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\nTotal trace count: {kmlTraceData.Count()}";
         }
 
         private void UpdateBindableProperties()
@@ -184,6 +184,7 @@ namespace KimporterX
         public string OpenButtonText { get; set; }
         public string ExecuteButtonText { get; set; }
         public string ConnStrJson { get; set; }
+        public string KMLInfoText { get; set; }
         public int SelectedTypeIndex { get; set; } = -1;
         public bool IsBusy { get; set; }
         public string TimerText { get; set; }

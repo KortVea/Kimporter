@@ -74,18 +74,27 @@
             <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
                   IsVisible="{Binding IsManaging, Converter={StaticResource inverter}}">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
+                <Label Text="{Binding KMLInfoText}"
+                       Grid.Row="0"
+                       HorizontalOptions="Start"
+                       VerticalOptions="Start"
+                       TextColor="DeepSkyBlue"
+                       FontAttributes="Italic"/>
                 <Button Text="{Binding ExecuteButtonText}" 
+                        Grid.Row="1"
                         FontSize="Large" BackgroundColor="LavenderBlush" 
                         HorizontalOptions="Center" VerticalOptions="Center"
                         Command="{Binding ExecuteCommand}"
                         IsEnabled="{Binding CanExecuteWriting}"/>
                 <Label Text="{Binding TimerText}"
+                       Grid.Row="2"
                        FontAttributes="Italic"
                        FontSize="Medium"
-                       TextColor="YellowGreen"
+                       TextColor="Violet"
                        HorizontalOptions="End"
                        VerticalOptions="End"/>
             </Grid>
