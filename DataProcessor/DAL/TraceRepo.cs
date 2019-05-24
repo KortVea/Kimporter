@@ -175,6 +175,10 @@ namespace DataProcessor.DAL
                                 await conn.InsertAsync(item.DownloadedPropertyData, trans);
                                 trans.Commit();
                             }
+                            catch (SqlException es) when (es.Number == 2627)
+                            {
+                                //Violation of Unique key constrain on Hash - Ignored
+                            }
                             catch (Exception)
                             {
                                 trans.Rollback();
