@@ -120,7 +120,7 @@ namespace DataProcessor.DAL
             var sqlDatePredicate = string.Empty;
             if (end.HasValue)
             {
-                sqlDatePredicate = $@" WHERE [Time] < '{end.Value.ToString("yyyy-MM-dd hh:mm:ss.fff")}'";
+                sqlDatePredicate = $@" WHERE [Time] <= '{end.Value.ToString("yyyy-MM-dd hh:mm:ss.fff")}'";
                 sqlHashCount += sqlDatePredicate;
             }
             var sqlHashPage = sqlHashPage1 + sqlDatePredicate + sqlHashPage2;
