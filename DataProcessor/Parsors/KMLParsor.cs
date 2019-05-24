@@ -53,22 +53,22 @@ namespace DataProcessor
                 Id = traceDataId,
                 Type = description.Type,
                 Time = description.Time,
-                Source = "N/A",
+                Source = $"{description.EquipmentId},???,UKN",
                 Latitude = (pm.Geometry as Point).Coordinate.Latitude,
                 Longitude = (pm.Geometry as Point).Coordinate.Longitude,
-                Milage = description.Milage,//todo: unit transform
-                //MilageSpecified = des,
-                Heading = 0,
-                //HeadingSpecified = ,
+                Milage = description.Milage,
+                MilageSpecified = true,
+                Heading = Utilities.OrientationToHeading(description.Orientation),
+                HeadingSpecified = true,
                 Speed = Convert.ToInt32(description.Speed),
-                //SpeedSpecified = ,
+                SpeedSpecified = true,
                 WasProcessed = false,
                 NumberOfProperties = propData.Count(),
                 DownloadedPropertyData = propData,
                 OutOfSync = true
             };
 
-            result.Hash = Hashing.CreateHash(result);//not here but 
+            result.Hash = Hashing.CreateHash(result);
             return result;
         }
     }
