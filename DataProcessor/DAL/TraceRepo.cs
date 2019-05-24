@@ -153,20 +153,21 @@ namespace DataProcessor.DAL
                     hashList.AddRange(pagedHash);
                 }
 
-                //writing hash to DB with local Hash list.
+                //writing list of non-colliding hash to DB.
                 var tempCount = 0;
-                var totalCount = list.Count();
-                foreach (var item in list)
+                var listOfDifferentHashes = list.Where(i => !hashList.Contains(i.Hash));
+                var totalCount = listOfDifferentHashes.Count();
+                foreach (var item in listOfDifferentHashes)
                 {
-                    tempCount++;
-                    progress?.Report(new DbProgressInfo
-                    {
-                        ProgressType = ProgressType.Writing,
-                        Number1 = tempCount,
-                        Number2 = totalCount
-                    });
                     if (!hashList.Contains(item.Hash))
                     {
+                        tempCount++;
+                        progress?.Report(new DbProgressInfo
+                        {
+                            ProgressType = ProgressType.Writing,
+                            Number1 = tempCount,
+                            Number2 = totalCount
+                        });
                         using (var trans = conn.BeginTransaction())
                         {
                             try

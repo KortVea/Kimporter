@@ -91,7 +91,7 @@ namespace KimporterX
                     var endFiltered = dataToWrite.Max(i => i.Time);
                     await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
                         new Progress<DbProgressInfo>(HandleDbProgressInfo),
-                        end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered);
+                        end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered); //protect against abnormal data
                 }
                 catch (Exception de)
                 {
