@@ -149,7 +149,10 @@ namespace KimporterX
                 ResetControls();
             }
             UpdateBindableProperties();
-            KMLInfoText = $"Life-sign trace count: {KMLLifeSignTraceData.Count()}\nNon-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\nTotal trace count: {kmlTraceData.Count()}";
+            KMLInfoText = $"Life-sign trace count: {KMLLifeSignTraceData.Count()}\n" +
+                $"Non-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\n" +
+                $"Total trace count: {kmlTraceData.Count()}\n" +
+                $"Total attached trace property count: {kmlTraceData.SelectMany(i => i.DownloadedPropertyData).Count()}";
         }
 
         private void UpdateBindableProperties()
