@@ -45,7 +45,6 @@ namespace KimporterX
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
                 HandleConnStr(ConnStrJson);
             }
-            
         }
 
         private void HandleConnStr(object input)
@@ -73,6 +72,7 @@ namespace KimporterX
                 TimerText = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
                 return IsBusy;
             });
+
             IEnumerable<DownloadedTraceData> dataToWrite;
             switch (SelectedTypeIndex)
             {
@@ -88,17 +88,7 @@ namespace KimporterX
                 {
                     var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
                     await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
-                        new Progress<Tuple<int, string>>((info) =>
-                        {
-                            if(info.Item2 == string.Empty)
-                            {
-                                ExecuteButtonText = $"{info.Item1} / {totalCount}";
-                            }
-                            else
-                            {
-
-                            }
-                        }));
+                        new Progress<DbProgressInfo>(HandleDbProgressInfo));
                 }
                 catch (Exception de)
                 {
@@ -106,8 +96,28 @@ namespace KimporterX
                     ResetControls();
                 }
             }
+
             IsBusy = false;
             stopWatch.Stop();
+        }
+
+        private void HandleDbProgressInfo(DbProgressInfo info)
+        {
+            switch (info.ProgressType)
+            {
+                case ProgressType.Default:
+                    ExecuteButtonText = $"{info.Message}";
+                    break;
+                case ProgressType.Writing:
+                    ExecuteButtonText = $"Writing {info.Number1} / {info.Number2}";
+                    break;
+                case ProgressType.Reading:
+                    ExecuteButtonText = $"Reading {info.Number1} / {info.Number2}";
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         private async Task GetKML()

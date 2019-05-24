@@ -44,7 +44,8 @@ namespace DataProcessor.DAL
             }
         }
 
-        public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress = null, bool eagerLoadingHash = true, DateTime? start = null, DateTime? end = null)
+        public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null,
+                                                                    bool eagerLoadingHash = true, DateTime? start = null, DateTime? end = null)
         {
             if (eagerLoadingHash)
             {
@@ -57,53 +58,139 @@ namespace DataProcessor.DAL
 
         }
 
-        private async Task InsertWithQueryOneByOne(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress)
+        private async Task InsertWithQueryOneByOne(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress)
         {
             var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
-                using (var trans = conn.BeginTransaction())
                 {
-                    try
+                    var tempCount = 0;
+                    var totalCount = list.Count();
+                    foreach (var item in list)
                     {
-                        var tempCount = 0;
-                        foreach (var item in list)
+                        if (progress != null)
                         {
-                            if (progress != null)
+                            tempCount++;
+                            progress.Report(new DbProgressInfo
                             {
-                                tempCount++;
-                                progress.Report(new Tuple<int, string>(tempCount, string.Empty));
-                            }
-                            var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash }, transaction: trans);
-                            if (existing)
+                                ProgressType = ProgressType.Writing,
+                                Number1 = tempCount,
+                                Number2 = totalCount
+                            });
+                        }
+                        //check Hash against DB
+                        var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash });
+                        if (existing)
+                        {
+                            continue;
+                        }
+                        else
+                        //write this item to DB
+                        {
+                            using (var trans = conn.BeginTransaction())
                             {
-                                continue;
-                            }
-                            else
-                            {
-                                await conn.InsertAsync(item, trans);
-                                await conn.InsertAsync(item.DownloadedPropertyData, trans);
+                                try
+                                {
+                                    await conn.InsertAsync(item, trans);
+                                    await conn.InsertAsync(item.DownloadedPropertyData, trans);
+                                    trans.Commit();
+                                }
+                                catch (Exception)
+                                {
+                                    trans.Rollback();
+                                    progress?.Report(new DbProgressInfo
+                                    {
+                                        ProgressType = ProgressType.Default,
+                                        Message = $"Error writing {item.ToString()}"
+                                    });
+                                    throw;
+                                }
                             }
                         }
-                        trans.Commit();
-                    }
-                    catch (Exception)
-                    {
-                        trans.Rollback();
-                        throw;
                     }
                 }
             }
         }
 
-        private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<Tuple<int, string>> progress, DateTime? start, DateTime? end)
+        private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress, DateTime? start, DateTime? end)
         {
-            var sqlHashRange = ;
+            var sqlHashRange = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)}";
+            var sqlHashCount = $@"SELECT COUNT(*) FROM {nameof(DownloadedTraceData)}";
+            var sqlHashPage = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)} ORDER BY [Hash] OFFSET @offset ROWS FETCH NEXT @batchSize ROWS ONLY";
+            var sqlDatePredicate = string.Empty;
+
+            if (start.HasValue && end.HasValue)
+            {
+                sqlDatePredicate = $@" WHERE [Time] < {end.Value.ToString("yyyy-MM-dd")} AND [Time] >= {start.Value.ToString("yyyy-MM-dd")}";
+                sqlHashRange += sqlDatePredicate;
+                sqlHashCount += sqlDatePredicate;
+            }
+
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
-                //actually query with a date range,
+                
+                //counting hash
+                progress?.Report(new DbProgressInfo
+                {
+                    ProgressType = ProgressType.Default,
+                    Message = string.IsNullOrEmpty(sqlDatePredicate) ? "Couting Hash" : $"Counting Hash with\n{sqlDatePredicate}"
+                });
+                var hashCount = await conn.ExecuteScalarAsync<int>(sqlHashCount);
+
+                //reading all hash pages
+                var hashList = new List<long>();
+                var batchSize = 1000;
+                for (int i = 0; i < hashCount / batchSize; i++)
+                {
+                    var offset = i * batchSize;
+                    progress?.Report(new DbProgressInfo
+                    {
+                        ProgressType = ProgressType.Reading,
+                        Number1 = offset,
+                        Number2 = hashCount
+                    });
+                    var pagedHash = await conn.QueryAsync<long>(sqlHashPage, new { offset = offset, batchSize = batchSize });
+                    hashList.AddRange(pagedHash);
+                }
+
+                //writing hash to DB with local Hash list.
+                var tempCount = 0;
+                var totalCount = list.Count();
+                foreach (var item in list)
+                {
+                    tempCount++;
+                    progress?.Report(new DbProgressInfo
+                    {
+                        ProgressType = ProgressType.Writing,
+                        Number1 = tempCount,
+                        Number2 = totalCount
+                    });
+                    if (hashList.Contains(item.Hash))
+                    {
+                        using (var trans = conn.BeginTransaction())
+                        {
+                            try
+                            {
+                                await conn.InsertAsync(item, trans);
+                                await conn.InsertAsync(item.DownloadedPropertyData, trans);
+                                trans.Commit();
+                            }
+                            catch (Exception)
+                            {
+                                trans.Rollback();
+                                progress?.Report(new DbProgressInfo
+                                {
+                                    ProgressType = ProgressType.Default,
+                                    Message = $"Error writing {item.ToString()}"
+                                });
+                                throw;
+                            }
+                        }
+                    }
+                }
+                
             }
         }
     }
