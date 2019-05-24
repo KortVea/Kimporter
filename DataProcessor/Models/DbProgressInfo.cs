@@ -14,6 +14,6 @@ namespace DataProcessor.Models
 
     public enum ProgressType
     {
-        Default, Writing, Reading
+        Default, Writing, Reading, Exception
     }
 }

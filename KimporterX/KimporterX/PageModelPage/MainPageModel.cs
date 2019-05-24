@@ -67,6 +67,7 @@ namespace KimporterX
         {
             stopWatch.Restart();
             IsBusy = true;
+            abnormallyCount = 0;
             Device.StartTimer(TimeSpan.FromSeconds(1), () =>
             {
                 TimerText = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
@@ -101,6 +102,10 @@ namespace KimporterX
 
             IsBusy = false;
             stopWatch.Stop();
+            if (abnormallyCount > 0)
+            {
+                ExecuteButtonText += $"\nHash Collision Count: {abnormallyCount}";
+            }
         }
 
         private void HandleDbProgressInfo(DbProgressInfo info)
@@ -115,6 +120,9 @@ namespace KimporterX
                     break;
                 case ProgressType.Reading:
                     ExecuteButtonText = $"Reading {info.Number1} / {info.Number2}";
+                    break;
+                case ProgressType.Exception:
+                    abnormallyCount++;
                     break;
                 default:
                     break;
@@ -162,6 +170,7 @@ namespace KimporterX
         private IEnumerable<DownloadedTraceData> kmlTraceData = new List<DownloadedTraceData>();
         private Dictionary<string, string> connStrDictionary = new Dictionary<string, string>();
         private Stopwatch stopWatch = new Stopwatch();
+        private int abnormallyCount;
 
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());

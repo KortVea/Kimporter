@@ -55,7 +55,6 @@ namespace DataProcessor.DAL
             {
                 await InsertWithQueryOneByOne(list, progress);
             }
-
         }
 
         private async Task InsertWithQueryOneByOne(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress)
@@ -116,14 +115,15 @@ namespace DataProcessor.DAL
         private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress, DateTime? end)
         {
             var sqlHashCount = $@"SELECT COUNT(*) FROM {nameof(DownloadedTraceData)}";
-            var sqlHashPage = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)} ORDER BY [Hash] OFFSET @offset ROWS FETCH NEXT @batchSize ROWS ONLY";
+            var sqlHashPage1 = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)} ";
+            var sqlHashPage2 = " ORDER BY [Hash] OFFSET @offset ROWS FETCH NEXT @batchSize ROWS ONLY";
             var sqlDatePredicate = string.Empty;
-
             if (end.HasValue)
             {
-                sqlDatePredicate = $@" WHERE [Time] < {end.Value.ToString("yyyy-MM-dd")}";
+                sqlDatePredicate = $@" WHERE [Time] < '{end.Value.ToString("yyyy-MM-dd hh:mm:ss.fff")}'";
                 sqlHashCount += sqlDatePredicate;
             }
+            var sqlHashPage = sqlHashPage1 + sqlDatePredicate + sqlHashPage2;
 
             using (var conn = new SqlConnection(_connStr))
             {
@@ -140,7 +140,7 @@ namespace DataProcessor.DAL
                 //reading all hash pages
                 var hashList = new List<long>();
                 var batchSize = 1000;
-                for (int i = 0; i < hashCount / batchSize; i++)
+                for (int i = 0; i <= hashCount / batchSize; i++)
                 {
                     var offset = i * batchSize;
                     progress?.Report(new DbProgressInfo
@@ -177,6 +177,11 @@ namespace DataProcessor.DAL
                             }
                             catch (SqlException es) when (es.Number == 2627)
                             {
+                                trans.Rollback();
+                                progress?.Report(new DbProgressInfo
+                                {
+                                    ProgressType = ProgressType.Exception,
+                                });
                                 //Violation of Unique key constrain on Hash - Ignored
                             }
                             catch (Exception)
