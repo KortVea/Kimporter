@@ -138,7 +138,7 @@ namespace KimporterX
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
                 kmlTraceData = KMLParsor.Parse(fileData.GetStream());
-                if (kmlTraceData == null || kmlTraceData.Count() <= 0)
+                if (kmlTraceData.Count() <= 0)
                 {
                     await CoreMethods.DisplayAlert("File Contents", "No trace data were found from the file. Looking for Folder \"Trace points\" and Placemark tags.", "OK");
                 }
@@ -148,11 +148,13 @@ namespace KimporterX
                 await CoreMethods.DisplayAlert("Error", ke.Message, "OK");
                 ResetControls();
             }
+
             UpdateBindableProperties();
+
             KMLInfoText = $"Life-sign trace count: {KMLLifeSignTraceData.Count()}\n" +
-                $"Non-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\n" +
-                $"Total trace count: {kmlTraceData.Count()}\n" +
-                $"Total attached trace property count: {kmlTraceData.SelectMany(i => i.DownloadedPropertyData).Count()}";
+            $"Non-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\n" +
+            $"Total trace count: {kmlTraceData.Count()}\n" +
+            $"Total attached trace property count: {kmlTraceData.SelectMany(i => i.DownloadedPropertyData).Count()}";
         }
 
         private void UpdateBindableProperties()

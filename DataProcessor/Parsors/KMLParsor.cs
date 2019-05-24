@@ -22,7 +22,7 @@ namespace DataProcessor
                 var doc = (Document)root.Feature;
                 var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
                 var trace = pointsFolder?.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
-                return trace;
+                return trace ?? new List<DownloadedTraceData>();
             }
             catch (Exception)
             {
