@@ -60,11 +60,13 @@ namespace KimporterX
                 CoreMethods.DisplayAlert("Json Format", $"{je.Message}", "OK");
                 connStrDictionary = new Dictionary<string, string>();
             }
-            UpdateBindableProperties();
+            RaisePropertyChanged("ConnStrSource");
         }
 
         private async Task WritingKMLTraceAndProperties()
         {
+            var shouldDisplayWarning = false; 
+            var msg = ""; 
             stopWatch.Restart();
             IsBusy = true;
             abnormallyCount = 0;
@@ -73,8 +75,7 @@ namespace KimporterX
                 TimerText = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
                 return IsBusy;
             });
-
-            IEnumerable<DownloadedTraceData> dataToWrite;
+            
             switch (SelectedTypeIndex)
             {
                 case 0: dataToWrite = KMLLifeSignTraceData; break;
@@ -89,22 +90,26 @@ namespace KimporterX
                 {
                     var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
                     var endFiltered = dataToWrite.Max(i => i.Time);
-                    await repo.InsertTracesAndPropsWhileIgnoringSameHash(dataToWrite,
-                        new Progress<DbProgressInfo>(HandleDbProgressInfo),
-                        end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered); //protect against abnormal data
+                    dataToWrite = await repo.InsertWithInMemoryCheck(dataToWrite,
+                                                                    new Progress<DbProgressInfo>(HandleDbProgressInfo),
+                                                                    end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered); //protect against abnormal data
+                    kmlTraceData = dataToWrite;
+                    UpdateCollectionBindableProperties();
                 }
                 catch (Exception de)
                 {
-                    await CoreMethods.DisplayAlert("Database", $"{de.Message}", "OK");
+                    //to show the popup outside of try-catch, so that the stopwatch can stop ahead of popup.
+                    shouldDisplayWarning = true;
+                    msg = de.Message;
                     ResetControls();
                 }
-            }
 
+            }
             IsBusy = false;
             stopWatch.Stop();
-            if (abnormallyCount > 0)
+            if (shouldDisplayWarning)
             {
-                ExecuteButtonText += $"\nHash Collision Count: {abnormallyCount}";
+                await CoreMethods.DisplayAlert("Database", $"{msg}", "OK");
             }
         }
 
@@ -122,12 +127,20 @@ namespace KimporterX
                     ExecuteButtonText = $"Reading {info.Number1} / {info.Number2}";
                     break;
                 case ProgressType.Exception:
+                    ExecuteButtonText = $"Collision #{info.Number1}";
                     abnormallyCount++;
                     break;
                 default:
                     break;
             }
-
+            if (dataToWrite.Count() == 0 && !IsBusy)
+            {
+                ExecuteButtonText += "\nExecution ended";
+            }
+            if (abnormallyCount > 0 && !IsBusy)
+            {
+                ExecuteButtonText += $"\nHash collisions count: {abnormallyCount}";
+            }
         }
 
         private async Task GetKML()
@@ -153,7 +166,7 @@ namespace KimporterX
                 ResetControls();
             }
 
-            UpdateBindableProperties();
+            UpdateAllBindableProperties();
 
             KMLInfoText = $"Life-sign trace count: {KMLLifeSignTraceData.Count()}\n" +
             $"Non-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\n" +
@@ -162,11 +175,16 @@ namespace KimporterX
             ExecuteButtonText = "Execute";
         }
 
-        private void UpdateBindableProperties()
+        private void UpdateCollectionBindableProperties()
         {
             RaisePropertyChanged("KMLLifeSignTraceData");
             RaisePropertyChanged("KMLNonLifeSignTraceData");
-            RaisePropertyChanged("ConnStrSource");
+        }
+
+        private void UpdateAllBindableProperties()
+        {
+            RaisePropertyChanged("KMLLifeSignTraceData");
+            RaisePropertyChanged("KMLNonLifeSignTraceData");
             RaisePropertyChanged("CanExecuteWriting");
         }
 
@@ -178,6 +196,7 @@ namespace KimporterX
         }
 
         private IEnumerable<DownloadedTraceData> kmlTraceData = new List<DownloadedTraceData>();
+        private IEnumerable<DownloadedTraceData> dataToWrite = new List<DownloadedTraceData>();
         private Dictionary<string, string> connStrDictionary = new Dictionary<string, string>();
         private Stopwatch stopWatch = new Stopwatch();
         private int abnormallyCount;

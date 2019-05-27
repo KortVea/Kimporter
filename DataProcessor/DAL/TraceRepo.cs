@@ -63,52 +63,51 @@ namespace DataProcessor.DAL
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
+
+                var tempCount = 0;
+                var totalCount = list.Count();
+                foreach (var item in list)
                 {
-                    var tempCount = 0;
-                    var totalCount = list.Count();
-                    foreach (var item in list)
+                    if (progress != null)
                     {
-                        if (progress != null)
+                        progress.Report(new DbProgressInfo
                         {
-                            tempCount++;
-                            progress.Report(new DbProgressInfo
+                            ProgressType = ProgressType.Writing,
+                            Number1 = ++ tempCount,
+                            Number2 = totalCount
+                        });
+                    }
+                    //check each item's Hash against DB
+                    var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash });
+                    if (existing)
+                    {
+                        continue;
+                    }
+                    else
+                    //write this item to DB
+                    {
+                        using (var trans = conn.BeginTransaction())
+                        {
+                            try
                             {
-                                ProgressType = ProgressType.Writing,
-                                Number1 = tempCount,
-                                Number2 = totalCount
-                            });
-                        }
-                        //check each item's Hash against DB
-                        var existing = await conn.ExecuteScalarAsync<bool>(sqlHashExists, new { Hash = item.Hash });
-                        if (existing)
-                        {
-                            continue;
-                        }
-                        else
-                        //write this item to DB
-                        {
-                            using (var trans = conn.BeginTransaction())
+                                await conn.InsertAsync(item, trans);
+                                await conn.InsertAsync(item.DownloadedPropertyData, trans);
+                                trans.Commit();
+                            }
+                            catch (Exception)
                             {
-                                try
+                                trans.Rollback();
+                                progress?.Report(new DbProgressInfo
                                 {
-                                    await conn.InsertAsync(item, trans);
-                                    await conn.InsertAsync(item.DownloadedPropertyData, trans);
-                                    trans.Commit();
-                                }
-                                catch (Exception)
-                                {
-                                    trans.Rollback();
-                                    progress?.Report(new DbProgressInfo
-                                    {
-                                        ProgressType = ProgressType.Default,
-                                        Message = $"Error writing {item.ToString()}"
-                                    });
-                                    throw;
-                                }
+                                    ProgressType = ProgressType.Default,
+                                    Message = $"Error writing {item.ToString()}"
+                                });
+                                throw;
                             }
                         }
                     }
                 }
+
             }
         }
 
@@ -128,7 +127,7 @@ namespace DataProcessor.DAL
             using (var conn = new SqlConnection(_connStr))
             {
                 await conn.OpenAsync();
-                
+
                 //counting hash
                 progress?.Report(new DbProgressInfo
                 {
@@ -138,10 +137,6 @@ namespace DataProcessor.DAL
                 var hashCount = await conn.ExecuteScalarAsync<int>(sqlHashCount);
 
                 //reading all hash pages
-                //Since GetHashCode() only can't guaranttee uniqueness BETWEEN program lifetimes, https://stackoverflow.com/questions/8178115/why-does-system-type-gethashcode-return-the-same-value-for-all-instances-and-typ
-                //reading Hash column from DB doesn't make sense.
-                //Also, since only one collection of hash will be kept in memory, this app can't tell the uniqueness between each KML file import.
-
                 var hashList = new List<long>();
                 var batchSize = 1000;
                 for (int i = 0; i <= hashCount / batchSize; i++)
@@ -171,13 +166,12 @@ namespace DataProcessor.DAL
                 }
                 foreach (var item in listOfDifferentHashes)
                 {
-                    if (!hashList.Contains(item.Hash))
+                    if (!hashList.Contains(item.Hash) && item.Time < DateTime.UtcNow)
                     {
-                        tempCount++;
                         progress?.Report(new DbProgressInfo
                         {
                             ProgressType = ProgressType.Writing,
-                            Number1 = tempCount,
+                            Number1 = ++ tempCount,
                             Number2 = totalCount
                         });
                         using (var trans = conn.BeginTransaction())
@@ -210,8 +204,77 @@ namespace DataProcessor.DAL
                         }
                     }
                 }
-                
+
             }
+        }
+
+        //Since GetHashCode() only can't guaranttee uniqueness BETWEEN program lifetimes, https://stackoverflow.com/questions/8178115/why-does-system-type-gethashcode-return-the-same-value-for-all-instances-and-typ
+        //reading Hash column from DB doesn't make sense.
+        //Also, since only one collection of hash will be kept in memory, this app can't tell the uniqueness between each KML file import.
+        public async Task<IEnumerable<DownloadedTraceData>> InsertWithInMemoryCheck(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null, DateTime? end = null)
+        {
+            var completedList = new List<DownloadedTraceData>();
+            var tempCount = 0;
+            var collisionCount = 0;
+            var totalCount = list.Count();
+            if (totalCount == 0)
+            {
+                progress?.Report(new DbProgressInfo
+                {
+                    ProgressType = ProgressType.Default,
+                    Message = "All traces in this file have been executed"
+                });
+            }
+            using (var conn = new SqlConnection(_connStr))
+            {
+                await conn.OpenAsync();
+                foreach (var item in list)
+                {
+                    if (item.Time > DateTime.UtcNow)
+                    {
+                        continue;
+                    }
+                    using (var trans = conn.BeginTransaction())
+                    {
+                        try
+                        {
+                            await conn.InsertAsync(item, trans);
+                            await conn.InsertAsync(item.DownloadedPropertyData, trans);
+                            trans.Commit();
+
+                            completedList.Add(item);
+                            progress?.Report(new DbProgressInfo
+                            {
+                                ProgressType = ProgressType.Writing,
+                                Number1 = ++ tempCount,
+                                Number2 = totalCount
+                            });
+                        }
+                        catch (SqlException es) when (es.Number == 2627)
+                        {
+                            //Violation of Unique key constrain on Hash - Ignored
+                            trans.Rollback();
+                            completedList.Add(item);
+                            progress?.Report(new DbProgressInfo
+                            {
+                                ProgressType = ProgressType.Exception,
+                                Number1 = ++collisionCount
+                            });
+                        }
+                        catch (Exception)
+                        {
+                            trans.Rollback();
+                            progress?.Report(new DbProgressInfo
+                            {
+                                ProgressType = ProgressType.Default,
+                                Message = $"Error writing {item.ToString()}"
+                            });
+                            throw;
+                        }
+                    }
+                }
+            }
+            return list.Except(completedList);
         }
     }
 }

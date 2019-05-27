@@ -80,6 +80,7 @@
                 </Grid.RowDefinitions>
                 <Label Text="{Binding KMLInfoText}"
                        Grid.Row="0"
+                       Margin="8"
                        HorizontalOptions="Start"
                        VerticalOptions="Start"
                        TextColor="DeepSkyBlue"
@@ -96,7 +97,8 @@
                        Grid.Row="2"
                        FontAttributes="Italic"
                        FontSize="Medium"
-                       TextColor="Violet"
+                       TextColor="Red"
+                       Margin="8"
                        HorizontalOptions="End"
                        VerticalOptions="End"/>
             </Grid>
