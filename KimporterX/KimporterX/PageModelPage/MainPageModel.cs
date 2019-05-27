@@ -1,5 +1,6 @@
 ﻿using DataProcessor;
 using DataProcessor.DAL;
+using DataProcessor.Interfaces;
 using DataProcessor.Models;
 using FreshMvvm;
 using Plugin.FilePicker;
@@ -16,8 +17,11 @@ namespace KimporterX
 {
     public class MainPageModel : FreshBasePageModel
     {
-        public MainPageModel()
+        private ITraceRepo<DownloadedTraceData> _traceRepo;
+        public MainPageModel(ITraceRepo<DownloadedTraceData> traceRepo)
         {
+            _traceRepo = traceRepo;
+
             IsManaging = false;
             ResetControls();
 
@@ -39,7 +43,11 @@ namespace KimporterX
             SaveConfigCommand = new Command(HandleConnStr);
 
             ExecuteCommand = new Command(async () => await WritingKMLTraceAndProperties());
+        }
 
+        public override void Init(object initData)
+        {
+            base.Init(initData);
             if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
             {
                 ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
@@ -88,11 +96,13 @@ namespace KimporterX
             {
                 try
                 {
-                    var repo = new TraceRepo(connStrDictionary[SelectedConnStrKey]);
+                    var connStr = connStrDictionary[SelectedConnStrKey];
+                    
                     var endFiltered = dataToWrite.Max(i => i.Time);
-                    dataToWrite = await repo.InsertWithInMemoryCheck(dataToWrite,
+                    dataToWrite = await _traceRepo.InsertWithInMemoryCheck(dataToWrite,
                                                                     new Progress<DbProgressInfo>(HandleDbProgressInfo),
-                                                                    end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered); //protect against abnormal data
+                                                                    end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered,
+                                                                    connStr); //protect against abnormal data
                     kmlTraceData = dataToWrite;
                     UpdateCollectionBindableProperties();
                 }

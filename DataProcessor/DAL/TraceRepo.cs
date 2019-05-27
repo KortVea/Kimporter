@@ -6,22 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using DataProcessor.Interfaces;
 using DataProcessor.Models;
 
 namespace DataProcessor.DAL
 {
-    public class TraceRepo : RepoBase<DownloadedTraceData>
+    public class TraceRepo : RepoBase<DownloadedTraceData>, ITraceRepo<DownloadedTraceData>
     {
-        public TraceRepo(string connStr) : base(connStr)
+        public async Task<IEnumerable<DownloadedTraceData>> GetFullTraces(string connStr = null)
         {
-        }
-
-        public async Task<IEnumerable<DownloadedTraceData>> GetFullTraces()
-        {
+            ConnStr = connStr == null ? ConnStr : connStr;
             string sql = $@"SELECT * FROM {nameof(DownloadedTraceData)} AS A 
                          LEFT JOIN {nameof(DownloadedPropertyData)} AS B 
                          ON B.TraceDataId = A.Id";
-            using (var conn = new SqlConnection(_connStr))
+            using (var conn = new SqlConnection(ConnStr))
             {
                 var tracePropDic = new Dictionary<Guid, DownloadedTraceData>();
 
@@ -45,8 +43,9 @@ namespace DataProcessor.DAL
         }
 
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null,
-                                                                    bool eagerLoadingHash = true, DateTime? end = null)
+                                                                    bool eagerLoadingHash = true, DateTime? end = null, string connStr = null)
         {
+            ConnStr = connStr == null ? ConnStr : connStr;
             if (eagerLoadingHash)
             {
                 await InsertWithQueryAllFirst(list, progress, end);
@@ -60,7 +59,7 @@ namespace DataProcessor.DAL
         private async Task InsertWithQueryOneByOne(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress)
         {
             var sqlHashExists = $@"SELECT COUNT(1) FROM {nameof(DownloadedTraceData)} WHERE Hash = @hash";
-            using (var conn = new SqlConnection(_connStr))
+            using (var conn = new SqlConnection(ConnStr))
             {
                 await conn.OpenAsync();
 
@@ -112,7 +111,7 @@ namespace DataProcessor.DAL
         }
 
         private async Task InsertWithQueryAllFirst(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress, DateTime? end)
-        {
+        {            
             var sqlHashCount = $@"SELECT COUNT(*) FROM {nameof(DownloadedTraceData)}";
             var sqlHashPage1 = $@"SELECT [Hash] FROM {nameof(DownloadedTraceData)} ";
             var sqlHashPage2 = " ORDER BY [Hash] OFFSET @offset ROWS FETCH NEXT @batchSize ROWS ONLY";
@@ -124,7 +123,7 @@ namespace DataProcessor.DAL
             }
             var sqlHashPage = sqlHashPage1 + sqlDatePredicate + sqlHashPage2;
 
-            using (var conn = new SqlConnection(_connStr))
+            using (var conn = new SqlConnection(ConnStr))
             {
                 await conn.OpenAsync();
 
@@ -211,8 +210,11 @@ namespace DataProcessor.DAL
         //Since GetHashCode() only can't guaranttee uniqueness BETWEEN program lifetimes, https://stackoverflow.com/questions/8178115/why-does-system-type-gethashcode-return-the-same-value-for-all-instances-and-typ
         //reading Hash column from DB doesn't make sense.
         //Also, since only one collection of hash will be kept in memory, this app can't tell the uniqueness between each KML file import.
-        public async Task<IEnumerable<DownloadedTraceData>> InsertWithInMemoryCheck(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null, DateTime? end = null)
+        public async Task<IEnumerable<DownloadedTraceData>> InsertWithInMemoryCheck(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null, 
+                                                                                    DateTime? end = null, string connStr = null)
         {
+            ConnStr = connStr == null ? ConnStr : connStr;
+
             var completedList = new List<DownloadedTraceData>();
             var tempCount = 0;
             var collisionCount = 0;
@@ -225,7 +227,7 @@ namespace DataProcessor.DAL
                     Message = "All traces in this file have been executed"
                 });
             }
-            using (var conn = new SqlConnection(_connStr))
+            using (var conn = new SqlConnection(ConnStr))
             {
                 await conn.OpenAsync();
                 foreach (var item in list)

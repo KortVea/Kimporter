@@ -9,7 +9,7 @@ namespace KimporterX
         public App()
         {
             InitializeComponent();
-
+            AppConfig.Config();
             MainPage = FreshPageModelResolver.ResolvePageModel<MainPageModel>();
         }
 
