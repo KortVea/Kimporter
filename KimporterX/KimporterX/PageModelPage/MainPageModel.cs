@@ -137,7 +137,11 @@ namespace KimporterX
                 var fileData = await CrossFilePicker.Current.PickFile(new string[] { ".kml" });
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
-                kmlTraceData = KMLParsor.Parse(fileData.GetStream());
+
+                IsBusy = true;
+                kmlTraceData = await KMLParsor.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
+                IsBusy = false;
+
                 if (kmlTraceData.Count() <= 0)
                 {
                     await CoreMethods.DisplayAlert("File Contents", "No trace data were found from the file. Looking for Folder \"Trace points\" and Placemark tags.", "OK");
@@ -155,6 +159,7 @@ namespace KimporterX
             $"Non-life-sign trace count: {KMLNonLifeSignTraceData.Count()}\n" +
             $"Total trace count: {kmlTraceData.Count()}\n" +
             $"Total attached trace property count: {kmlTraceData.SelectMany(i => i.DownloadedPropertyData).Count()}";
+            ExecuteButtonText = "Execute";
         }
 
         private void UpdateBindableProperties()

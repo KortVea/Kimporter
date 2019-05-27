@@ -84,12 +84,14 @@
                        VerticalOptions="Start"
                        TextColor="DeepSkyBlue"
                        FontAttributes="Italic"/>
-                <Button Text="{Binding ExecuteButtonText}" 
-                        Grid.Row="1"
-                        FontSize="Large" BackgroundColor="LavenderBlush" 
-                        HorizontalOptions="Center" VerticalOptions="Center"
-                        Command="{Binding ExecuteCommand}"
-                        IsEnabled="{Binding CanExecuteWriting}"/>
+                <StackLayout Grid.Row="1" 
+                             HorizontalOptions="Center" VerticalOptions="Center">
+                    <ActivityIndicator Color="Red" IsRunning="{Binding IsBusy}"/>
+                    <Button Text="{Binding ExecuteButtonText}" 
+                            FontSize="Large" BackgroundColor="LavenderBlush" 
+                            Command="{Binding ExecuteCommand}"
+                            IsEnabled="{Binding CanExecuteWriting}"/>
+                </StackLayout>
                 <Label Text="{Binding TimerText}"
                        Grid.Row="2"
                        FontAttributes="Italic"

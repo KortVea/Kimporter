@@ -6,14 +6,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace DataProcessor
 {
     public static class KMLParsor
     {
-        public static IEnumerable<DownloadedTraceData> Parse(Stream stream)
+        public static async Task<IEnumerable<DownloadedTraceData>> Parse(Stream stream)
         {
-            try
+            return await Task.Run(() =>
             {
                 var parser = new Parser();
                 parser.Parse(stream);
@@ -23,11 +24,7 @@ namespace DataProcessor
                 var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
                 var trace = pointsFolder?.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
                 return trace ?? new List<DownloadedTraceData>();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            });
         }
 
         private static DownloadedTraceData TransformPlacemarkIntoTrace(Placemark pm)

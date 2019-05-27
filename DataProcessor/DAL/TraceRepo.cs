@@ -138,6 +138,10 @@ namespace DataProcessor.DAL
                 var hashCount = await conn.ExecuteScalarAsync<int>(sqlHashCount);
 
                 //reading all hash pages
+                //Since GetHashCode() only can't guaranttee uniqueness BETWEEN program lifetimes, https://stackoverflow.com/questions/8178115/why-does-system-type-gethashcode-return-the-same-value-for-all-instances-and-typ
+                //reading Hash column from DB doesn't make sense.
+                //Also, since only one collection of hash will be kept in memory, this app can't tell the uniqueness between each KML file import.
+
                 var hashList = new List<long>();
                 var batchSize = 1000;
                 for (int i = 0; i <= hashCount / batchSize; i++)
@@ -157,6 +161,14 @@ namespace DataProcessor.DAL
                 var tempCount = 0;
                 var listOfDifferentHashes = list.Where(i => !hashList.Contains(i.Hash));
                 var totalCount = listOfDifferentHashes.Count();
+                if (totalCount == 0)
+                {
+                    progress?.Report(new DbProgressInfo
+                    {
+                        ProgressType = ProgressType.Default,
+                        Message = "No new trace to update"
+                    });
+                }
                 foreach (var item in listOfDifferentHashes)
                 {
                     if (!hashList.Contains(item.Hash))
