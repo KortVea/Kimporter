@@ -8,12 +8,14 @@ namespace KimporterX
     {
         public const string JsonStrKey = "JsonStrKey";
         public const string ConnStrDic = "ConnStrDic";
-        public const string OperationHistoryKey = "OperationHistoryKey";
         public App()
         {
             InitializeComponent();
             AppConfig.Config();
-            MainPage = FreshPageModelResolver.ResolvePageModel<MainPageModel>();
+
+            var page = FreshPageModelResolver.ResolvePageModel<MainPageModel>();
+            var basicNavContainer = new FreshNavigationContainer(page);
+            MainPage = basicNavContainer;
         }
 
         protected override void OnStart()

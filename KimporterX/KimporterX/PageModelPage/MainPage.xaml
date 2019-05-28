@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:KimporterX"
              xmlns:comp="clr-namespace:KimporterX.ViewComponents"
-             x:Class="KimporterX.MainPage">
+             x:Class="KimporterX.MainPage"
+             Title="KML IMPORT">
 
     <ContentPage.Resources>
         <ResourceDictionary>
@@ -28,9 +29,16 @@
             </Grid.ColumnDefinitions>
 
             <Label Grid.Row="0" Grid.Column="0" Text="KML File to Import"/>
-            <Button Grid.Row="0" Grid.Column="1" Text="{Binding OpenButtonText}" 
-                    Command="{Binding OpenCommand}" BackgroundColor="Aquamarine"/>
-
+            <StackLayout Grid.Row="0" Grid.Column="1" Orientation="Horizontal">
+                <Button Text="{Binding OpenButtonText}" 
+                        Command="{Binding OpenCommand}" 
+                        BackgroundColor="Aquamarine"
+                        HorizontalOptions="FillAndExpand"/>
+                <Button Text="History" Command="{Binding OpenHistory}" 
+                        BackgroundColor="DarkSeaGreen"
+                        WidthRequest="72"
+                        Margin="8,0,0,0"/>
+            </StackLayout>
             <Label Grid.Row="1" Grid.Column="0" Text="Connection String"/>
             <StackLayout Grid.Row="1" Grid.Column="1"
                          Orientation="Horizontal">
@@ -39,7 +47,8 @@
                         HorizontalOptions="FillAndExpand"
                         BackgroundColor="LightPink"/>
                 <Button Text="Manage" Command="{Binding ManageCommand}" 
-                        Margin="8,0,0,0" BackgroundColor="LightCoral"/>
+                        Margin="8,0,0,0" BackgroundColor="LightCoral"
+                        WidthRequest="72"/>
             </StackLayout>
 
             <Label Grid.Row="2" Grid.Column="0" Text="Data Type to Import"/>

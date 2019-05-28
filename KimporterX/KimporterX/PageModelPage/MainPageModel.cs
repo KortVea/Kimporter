@@ -4,6 +4,7 @@ using DataProcessor.DAL;
 using DataProcessor.Interfaces;
 using DataProcessor.Models;
 using FreshMvvm;
+using KimporterX.Models;
 using Plugin.FilePicker;
 using System;
 using System.Collections.Generic;
@@ -43,6 +44,12 @@ namespace KimporterX
             OpenCommand = new FreshAwaitCommand(async (tcs) =>
             {
                 await GetKML();
+                tcs.SetResult(true);
+            });
+
+            OpenHistory = new FreshAwaitCommand(async (tcs) =>
+            {
+                await CoreMethods.PushPageModel<LogPageModel>();
                 tcs.SetResult(true);
             });
 
@@ -125,13 +132,24 @@ namespace KimporterX
             }
 
             IsBusy = false;
+            await SaveToLog();
             stopWatch.Stop();
             if (shouldDisplayWarning)
             {
                 await CoreMethods.DisplayAlert("Database", $"{msg}", "OK");
             }
-            //save history and show updated history
+        }
 
+        private async Task SaveToLog()
+        {
+            var hisKey = DateTime.Now.ToLongDateString();
+            await BlobCache.UserAccount.InsertObject(hisKey, new OperationHistory
+            {
+                Time = DateTime.Now,
+                FileName = fileName, 
+                ConnName = SelectedConnStrKey,
+                Type = SelectedTypeIndex
+            });
         }
 
         private void HandleDbProgressInfo(DbProgressInfo info)
@@ -171,6 +189,7 @@ namespace KimporterX
                 var fileData = await CrossFilePicker.Current.PickFile(new string[] { ".kml" });
                 if (fileData == null) return;
                 OpenButtonText = fileData.FilePath;
+                fileName = fileData.FileName;
 
                 IsBusy = true;
                 kmlTraceData = await _kmlParsor.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
@@ -221,6 +240,7 @@ namespace KimporterX
         private Dictionary<string, string> connStrDictionary = new Dictionary<string, string>();
         private Stopwatch stopWatch = new Stopwatch();
         private int abnormallyCount;
+        private string fileName = "";
 
         public ObservableCollection<DownloadedTraceData> KMLLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type == 0).ToList());
         public ObservableCollection<DownloadedTraceData> KMLNonLifeSignTraceData => new ObservableCollection<DownloadedTraceData>(kmlTraceData.Where(i => i.Type != 0).ToList());
@@ -230,6 +250,7 @@ namespace KimporterX
         public ICommand OpenCommand { get; set; }
         public ICommand SaveConfigCommand { get; set; }
         public ICommand ExecuteCommand { get; set; }
+        public ICommand OpenHistory { get; set; }
         public bool IsManaging { get; set; }
         public string OpenButtonText { get; set; }
         public string ExecuteButtonText { get; set; }

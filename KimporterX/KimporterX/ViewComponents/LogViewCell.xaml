@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ViewCell xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:localvc="clr-namespace:KimporterX.ViewComponents"
+             mc:Ignorable="d"
+             x:Class="KimporterX.ViewComponents.LogViewCell">
+    <ViewCell.View>
+        <Grid>
+            <Grid.Resources>
+                <ResourceDictionary>
+                    <Style TargetType="Label">
+                        <Setter Property="FontSize" Value="Small"/>
+                        <Setter Property="HorizontalOptions" Value="Start"/>
+                        <Setter Property="VerticalOptions" Value="Center"/>
+                    </Style>
+                    <localvc:IsLifeSignToStringConverter x:Key="lifeSignStringConverter"/>
+                    <localvc:IsLifeSignToColorConverter x:Key="lifeSignColorConverter"/>
+
+                </ResourceDictionary>
+            </Grid.Resources>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <ColumnDefinition Width="2*"/>
+            </Grid.ColumnDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" Text="{Binding Time}" x:Name="time"/>
+            <Label Grid.Row="0" Grid.Column="1" Text="{Binding FileName}" x:Name="fileName" />
+            <Label Grid.Row="1" Grid.Column="0" Text="{Binding ConnName}" x:Name="connName" />
+            <Label Grid.Row="1" Grid.Column="1" 
+                   Text="{Binding Type, Converter={StaticResource lifeSignStringConverter}}"
+                   TextColor="{Binding Type, Converter={StaticResource lifeSignColorConverter}}"
+                   x:Name="isLifeSign"/>
+            <BoxView Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
+                     BackgroundColor="Chartreuse" 
+                     HeightRequest="2"/>
+        </Grid>
+    </ViewCell.View>
+</ViewCell>
