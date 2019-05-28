@@ -142,13 +142,14 @@ namespace KimporterX
 
         private async Task SaveToLog()
         {
-            var hisKey = DateTime.Now.ToLongDateString();
+            var hisKey = DateTime.Now.Ticks.GetHashCode().ToString();
             await BlobCache.UserAccount.InsertObject(hisKey, new OperationHistory
             {
                 Time = DateTime.Now,
                 FileName = fileName, 
                 ConnName = SelectedConnStrKey,
-                Type = SelectedTypeIndex
+                Type = SelectedTypeIndex,
+                Output = ExecuteButtonText.Replace("\n", " ")
             });
         }
 

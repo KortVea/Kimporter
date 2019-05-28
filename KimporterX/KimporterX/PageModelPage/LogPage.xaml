@@ -10,7 +10,8 @@
     <ContentPage.Content>
         <ListView ItemsSource="{Binding LogList}"
                   SelectionMode="None"
-                  HasUnevenRows="True">
+                  HasUnevenRows="True"
+                  Margin="8">
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <localvc:LogViewCell/>

@@ -10,5 +10,6 @@ namespace KimporterX.Models
         public string FileName { get; set; }
         public string ConnName { get; set; }
         public int Type { get; set; }
+        public string Output { get; set; }
     }
 }

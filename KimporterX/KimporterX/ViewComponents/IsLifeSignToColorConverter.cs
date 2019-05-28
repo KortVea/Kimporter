@@ -15,7 +15,7 @@ namespace KimporterX.ViewComponents
             {
                 case 0: return Color.Red;
                 case 1: return Color.Blue;
-                default: return Color.Black;
+                default: return Color.Violet;
             }
         }
 
