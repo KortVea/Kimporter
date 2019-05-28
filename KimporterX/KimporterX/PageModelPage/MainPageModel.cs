@@ -118,7 +118,7 @@ namespace KimporterX
                 var endFiltered = dataToWrite.Max(i => i.Time);
                 dataToWrite = await _traceRepo.InsertWithInMemoryCheck(dataToWrite,
                                                                 new Progress<DbProgressInfo>(HandleDbProgressInfo),
-                                                                end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered,
+                                                                endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered,
                                                                 connStr); //protect against abnormal data
                 kmlTraceData = dataToWrite;
                 UpdateCollectionBindableProperties();
