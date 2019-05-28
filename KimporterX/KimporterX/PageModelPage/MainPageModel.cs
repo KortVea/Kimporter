@@ -1,4 +1,5 @@
-﻿using DataProcessor;
+﻿using Akavache;
+using DataProcessor;
 using DataProcessor.DAL;
 using DataProcessor.Interfaces;
 using DataProcessor.Models;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
@@ -18,19 +20,23 @@ namespace KimporterX
     public class MainPageModel : FreshBasePageModel
     {
         private ITraceRepo<DownloadedTraceData> _traceRepo;
-        public MainPageModel(ITraceRepo<DownloadedTraceData> traceRepo)
+        private IKMLParosr _kmlParsor;
+        private IConnStrJsonParsor _connStrJsonParsor;
+        public MainPageModel(ITraceRepo<DownloadedTraceData> traceRepo, IKMLParosr kMLParosr, IConnStrJsonParsor connStrJsonParsor)
         {
             _traceRepo = traceRepo;
+            _kmlParsor = kMLParosr;
+            _connStrJsonParsor = connStrJsonParsor;
 
             IsManaging = false;
             ResetControls();
 
-            ManageCommand = new Command(() =>
+            ManageCommand = new Command(async () =>
             {
                 IsManaging = !IsManaging;
                 if (!IsManaging)
                 {
-                    HandleConnStr(ConnStrJson);
+                    await HandleConnStr(ConnStrJson);
                 }
             });
 
@@ -40,7 +46,7 @@ namespace KimporterX
                 tcs.SetResult(true);
             });
 
-            SaveConfigCommand = new Command(HandleConnStr);
+            SaveConfigCommand = new Command(async (connStrJson) => await HandleConnStr(connStrJson));
 
             ExecuteCommand = new Command(async () => await WritingKMLTraceAndProperties());
         }
@@ -48,24 +54,30 @@ namespace KimporterX
         public override void Init(object initData)
         {
             base.Init(initData);
-            if (Application.Current.Properties.ContainsKey(App.JsonStrKey))
-            {
-                ConnStrJson = Application.Current.Properties[App.JsonStrKey] as string;
-                HandleConnStr(ConnStrJson);
-            }
+            BlobCache.Secure.GetObject<string>(App.JsonStrKey)
+                            .Subscribe(x => ConnStrJson = x, ex => ConnStrJson = "");
+
+            BlobCache.Secure.GetObject<Dictionary<string, string>>(App.ConnStrDic)
+                            .Subscribe(x =>
+                            {
+                                connStrDictionary = x;
+                                RaisePropertyChanged("ConnStrSource");
+                            },
+                            ex => connStrDictionary = new Dictionary<string, string>());
         }
 
-        private void HandleConnStr(object input)
+        private async Task HandleConnStr(object input)
         {
             try
             {
                 var str = input as string;
-                connStrDictionary = ConnStrJsonParsor.Parse(str);
-                Application.Current.Properties[App.JsonStrKey] = str;
+                connStrDictionary = _connStrJsonParsor.Parse(str);
+                await BlobCache.Secure.InsertObject(App.ConnStrDic, connStrDictionary, TimeSpan.FromDays(56));
+                await BlobCache.Secure.InsertObject(App.JsonStrKey, ConnStrJson, TimeSpan.FromDays(56));
             }
             catch (Exception je)
             {
-                CoreMethods.DisplayAlert("Json Format", $"{je.Message}", "OK");
+                await CoreMethods.DisplayAlert("Json Format", $"{je.Message}", "OK");
                 connStrDictionary = new Dictionary<string, string>();
             }
             RaisePropertyChanged("ConnStrSource");
@@ -73,8 +85,8 @@ namespace KimporterX
 
         private async Task WritingKMLTraceAndProperties()
         {
-            var shouldDisplayWarning = false; 
-            var msg = ""; 
+            var shouldDisplayWarning = false;
+            var msg = "";
             stopWatch.Restart();
             IsBusy = true;
             abnormallyCount = 0;
@@ -83,7 +95,7 @@ namespace KimporterX
                 TimerText = stopWatch.Elapsed.ToString(@"hh\:mm\:ss");
                 return IsBusy;
             });
-            
+
             switch (SelectedTypeIndex)
             {
                 case 0: dataToWrite = KMLLifeSignTraceData; break;
@@ -91,36 +103,35 @@ namespace KimporterX
                 case 2: dataToWrite = kmlTraceData; break;
                 default: return;
             }
-            var totalCount = dataToWrite.Count();
-            if (totalCount > 0)
-            {
-                try
-                {
-                    var connStr = connStrDictionary[SelectedConnStrKey];
-                    
-                    var endFiltered = dataToWrite.Max(i => i.Time);
-                    dataToWrite = await _traceRepo.InsertWithInMemoryCheck(dataToWrite,
-                                                                    new Progress<DbProgressInfo>(HandleDbProgressInfo),
-                                                                    end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered,
-                                                                    connStr); //protect against abnormal data
-                    kmlTraceData = dataToWrite;
-                    UpdateCollectionBindableProperties();
-                }
-                catch (Exception de)
-                {
-                    //to show the popup outside of try-catch, so that the stopwatch can stop ahead of popup.
-                    shouldDisplayWarning = true;
-                    msg = de.Message;
-                    ResetControls();
-                }
 
+            try
+            {
+                var connStr = connStrDictionary[SelectedConnStrKey];
+
+                var endFiltered = dataToWrite.Max(i => i.Time);
+                dataToWrite = await _traceRepo.InsertWithInMemoryCheck(dataToWrite,
+                                                                new Progress<DbProgressInfo>(HandleDbProgressInfo),
+                                                                end: endFiltered > DateTime.UtcNow ? DateTime.UtcNow : endFiltered,
+                                                                connStr); //protect against abnormal data
+                kmlTraceData = dataToWrite;
+                UpdateCollectionBindableProperties();
             }
+            catch (Exception de)
+            {
+                //to show the popup outside of try-catch, so that the stopwatch can stop ahead of popup.
+                shouldDisplayWarning = true;
+                msg = de.Message;
+                ResetControls();
+            }
+
             IsBusy = false;
             stopWatch.Stop();
             if (shouldDisplayWarning)
             {
                 await CoreMethods.DisplayAlert("Database", $"{msg}", "OK");
             }
+            //save history and show updated history
+
         }
 
         private void HandleDbProgressInfo(DbProgressInfo info)
@@ -162,7 +173,7 @@ namespace KimporterX
                 OpenButtonText = fileData.FilePath;
 
                 IsBusy = true;
-                kmlTraceData = await KMLParsor.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
+                kmlTraceData = await _kmlParsor.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
                 IsBusy = false;
 
                 if (kmlTraceData.Count() <= 0)

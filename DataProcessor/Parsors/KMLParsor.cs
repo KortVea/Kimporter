@@ -1,4 +1,5 @@
 ﻿using DataProcessor.Helpers;
+using DataProcessor.Interfaces;
 using DataProcessor.Models;
 using SharpKml.Base;
 using SharpKml.Dom;
@@ -10,9 +11,9 @@ using System.Threading.Tasks;
 
 namespace DataProcessor
 {
-    public static class KMLParsor
+    public class KMLParsor : IKMLParosr
     {
-        public static async Task<IEnumerable<DownloadedTraceData>> Parse(Stream stream)
+        public async Task<IEnumerable<DownloadedTraceData>> Parse(Stream stream)
         {
             return await Task.Run(() =>
             {
@@ -27,7 +28,7 @@ namespace DataProcessor
             });
         }
 
-        private static DownloadedTraceData TransformPlacemarkIntoTrace(Placemark pm)
+        private DownloadedTraceData TransformPlacemarkIntoTrace(Placemark pm)
         {
             var description = HTMLStringParsor.Parse(pm.Description.Text);
             List<DownloadedPropertyData> propData = new List<DownloadedPropertyData>();

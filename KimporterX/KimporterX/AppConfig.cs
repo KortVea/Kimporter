@@ -1,4 +1,5 @@
-﻿using DataProcessor.DAL;
+﻿using DataProcessor;
+using DataProcessor.DAL;
 using DataProcessor.Interfaces;
 using DataProcessor.Models;
 using FreshMvvm;
@@ -12,7 +13,13 @@ namespace KimporterX
     {
         public static void Config()
         {
+            //IOC
             FreshIOC.Container.Register<ITraceRepo<DownloadedTraceData>, TraceRepo>();
+            FreshIOC.Container.Register<IKMLParosr, KMLParsor>();
+            FreshIOC.Container.Register<IConnStrJsonParsor, ConnStrJsonParsor>();
+            //Persistence
+            Akavache.Registrations.Start("KimporterX");
         }
+
     }
 }

@@ -1,4 +1,5 @@
-﻿using FreshMvvm;
+﻿using Akavache;
+using FreshMvvm;
 using Xamarin.Forms;
 
 namespace KimporterX
@@ -6,6 +7,8 @@ namespace KimporterX
     public partial class App : Application
     {
         public const string JsonStrKey = "JsonStrKey";
+        public const string ConnStrDic = "ConnStrDic";
+        public const string OperationHistoryKey = "OperationHistoryKey";
         public App()
         {
             InitializeComponent();
@@ -21,6 +24,7 @@ namespace KimporterX
         protected override void OnSleep()
         {
             // Handle when your app sleeps
+            BlobCache.Shutdown().Wait();
         }
 
         protected override void OnResume()
