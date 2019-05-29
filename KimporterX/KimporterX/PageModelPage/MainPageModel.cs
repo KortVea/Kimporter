@@ -1,6 +1,4 @@
 ﻿using Akavache;
-using DataProcessor;
-using DataProcessor.DAL;
 using DataProcessor.Interfaces;
 using DataProcessor.Models;
 using FreshMvvm;
@@ -132,7 +130,7 @@ namespace KimporterX
             }
 
             IsBusy = false;
-            await SaveToLog();
+            
             stopWatch.Stop();
             if (shouldDisplayWarning)
             {
@@ -146,14 +144,14 @@ namespace KimporterX
             await BlobCache.UserAccount.InsertObject(hisKey, new OperationHistory
             {
                 Time = DateTime.Now,
-                FileName = fileName, 
+                FileName = fileName,
                 ConnName = SelectedConnStrKey,
                 Type = SelectedTypeIndex,
-                Output = ExecuteButtonText.Replace("\n", " ")
+                Output = ExecuteButtonText.Replace("\n", "; ")
             });
         }
 
-        private void HandleDbProgressInfo(DbProgressInfo info)
+        private async void HandleDbProgressInfo(DbProgressInfo info)
         {
             switch (info.ProgressType)
             {
@@ -176,10 +174,15 @@ namespace KimporterX
             if (dataToWrite.Count() == 0 && !IsBusy)
             {
                 ExecuteButtonText += "\nExecution ended";
+                
             }
             if (abnormallyCount > 0 && !IsBusy)
             {
                 ExecuteButtonText += $"\nHash collisions count: {abnormallyCount}";
+            }
+            if (!IsBusy)
+            {
+                await SaveToLog();
             }
         }
 
@@ -262,9 +265,9 @@ namespace KimporterX
         public string TimerText { get; set; }
         public bool CanExecuteWriting => !IsBusy &&
             SelectedTypeIndex != -1 &&
-            kmlTraceData?.Count() > 0 &&
             connStrDictionary.Count > 0 &&
             SelectedConnStrKey != null;
+
         public string ConnStrJsonPlaceHolder =>
 @"//Put all your connection strings as Json object here. 
 //The keys will be displayed in the dropdown list above.
