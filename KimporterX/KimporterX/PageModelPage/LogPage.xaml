@@ -8,16 +8,24 @@
              x:Class="KimporterX.LogPage"
              Title="OPERATION LOG">
     <ContentPage.Content>
-        <ListView ItemsSource="{Binding LogList}"
-                  SelectionMode="None"
-                  HasUnevenRows="True"
-                  Margin="8">
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <localvc:LogViewCell/>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-                  
+        <StackLayout>
+            <ListView ItemsSource="{Binding LogList}"
+                      SelectionMode="None"
+                      HasUnevenRows="True"
+                      Margin="8">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <localvc:LogViewCell/>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Button Text="Clear Log" 
+                    TextColor="SlateBlue"
+                    VerticalOptions="End"
+                    HorizontalOptions="End"
+                    BackgroundColor="LightYellow"
+                    Margin="8"
+                    Command="{Binding ClearLogCommand}"/>
+        </StackLayout>
     </ContentPage.Content>
 </ContentPage>
