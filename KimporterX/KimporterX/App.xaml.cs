@@ -21,12 +21,16 @@ namespace KimporterX
         protected override void OnStart()
         {
             // Handle when your app starts
+            Registrations.Start("KimporterX");
         }
 
         protected override void OnSleep()
         {
             // Handle when your app sleeps
-            BlobCache.Shutdown().Wait();
+            //BlobCache.Shutdown().Wait(); //Not shutting down https://github.com/reactiveui/Akavache/issues/342
+            BlobCache.UserAccount.Flush();
+            BlobCache.Secure.Flush();
+
         }
 
         protected override void OnResume()

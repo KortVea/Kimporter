@@ -130,7 +130,6 @@ namespace KimporterX
             }
 
             IsBusy = false;
-            
             stopWatch.Stop();
             if (shouldDisplayWarning)
             {
@@ -138,20 +137,21 @@ namespace KimporterX
             }
         }
 
-        private async Task SaveToLog()
+        private void SaveToLog()
         {
-            var hisKey = DateTime.Now.Ticks.GetHashCode().ToString();
-            await BlobCache.UserAccount.InsertObject(hisKey, new OperationHistory
+            var hisKey = Guid.NewGuid().ToString();
+            var hisValue = new OperationHistory
             {
                 Time = DateTime.Now,
                 FileName = fileName,
                 ConnName = SelectedConnStrKey,
                 Type = SelectedTypeIndex,
                 Output = ExecuteButtonText.Replace("\n", "; ")
-            });
+            };
+            BlobCache.UserAccount.InsertObject(hisKey, hisValue).Subscribe();
         }
 
-        private async void HandleDbProgressInfo(DbProgressInfo info)
+        private void HandleDbProgressInfo(DbProgressInfo info)
         {
             switch (info.ProgressType)
             {
@@ -174,7 +174,7 @@ namespace KimporterX
             if (dataToWrite.Count() == 0 && !IsBusy)
             {
                 ExecuteButtonText += "\nExecution ended";
-                
+
             }
             if (abnormallyCount > 0 && !IsBusy)
             {
@@ -182,7 +182,7 @@ namespace KimporterX
             }
             if (!IsBusy)
             {
-                await SaveToLog();
+                SaveToLog();
             }
         }
 

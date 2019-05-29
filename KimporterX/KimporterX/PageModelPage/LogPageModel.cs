@@ -19,7 +19,7 @@ namespace KimporterX
                 BlobCache.UserAccount.InvalidateAllObjects<OperationHistory>()
                 .Subscribe( i => LogList = new ObservableCollection<OperationHistory>()));
             BlobCache.UserAccount.GetAllObjects<OperationHistory>()
-                .Subscribe( x => LogList = new ObservableCollection<OperationHistory>(x?.OrderByDescending(i => i.Time)),
+                .Subscribe( x => LogList = new ObservableCollection<OperationHistory>(x.OrderByDescending(i => i.Time)),
                     ex => LogList = new ObservableCollection<OperationHistory>());
         }
 
