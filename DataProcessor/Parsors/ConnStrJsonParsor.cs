@@ -8,7 +8,7 @@ namespace DataProcessor
     {
         public Dictionary<string, string> Parse(string str)
         {
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(str);
+            return JsonConvert.DeserializeObject<Dictionary<string, string>>(str) ?? new Dictionary<string, string>();
         }
     }
 }
