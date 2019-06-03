@@ -7,9 +7,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
+[assembly: InternalsVisibleTo("NUnitTest")]
 namespace DataProcessor
 {
+    
     internal static class HTMLStringParsor
     {
         private static readonly string[] TraceKeys = typeof(FeatureDescriptionBindingModel).GetProperties()

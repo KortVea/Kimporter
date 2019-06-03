@@ -3,11 +3,12 @@ using DataProcessor;
 using DataProcessor.Interfaces;
 using System;
 using Newtonsoft.Json;
+using NUnitTest;
 
 namespace TestDataProcessor.Parsors
 {
     [TestFixture]
-    public class JsonParsor
+    public class TestJsonParsor: TestBase
     {
         private IConnStrJsonParsor parsor;
 
