@@ -36,10 +36,12 @@
                     Text="{Binding OpenButtonText}" 
                     Command="{Binding OpenCommand}" 
                     BackgroundColor="Aquamarine"
-                    HorizontalOptions="FillAndExpand"/>
+                    HorizontalOptions="FillAndExpand"
+                    AutomationId="OpenButton"/>
             <Button Grid.Row="0" Grid.Column="2" 
                     Text="History" Command="{Binding OpenHistory}" 
-                    BackgroundColor="DarkSeaGreen"/>
+                    BackgroundColor="DarkSeaGreen"
+                    AutomationId="HistoryButton"/>
             
             <Label Grid.Row="1" Grid.Column="0" 
                    Text="Connection String"/>
@@ -47,17 +49,20 @@
                     SelectedItem="{Binding SelectedConnStrKey}"
                     ItemsSource="{Binding ConnStrSource}"
                     HorizontalOptions="FillAndExpand"
-                    BackgroundColor="LightPink"/>
+                    BackgroundColor="LightPink"
+                    AutomationId="ConnStrPicker"/>
             <Button Grid.Row="1" Grid.Column="2" 
                     Text="Manage" 
                     Command="{Binding ManageCommand}" 
-                    BackgroundColor="LightCoral"/>
+                    BackgroundColor="LightCoral"
+                    AutomationId="ManageButton"/>
 
             <Label Grid.Row="2" Grid.Column="0" 
                    Text="Data Type to Import"/>
             <Picker Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2"
                     BackgroundColor="Gold"
-                    SelectedIndex="{Binding SelectedTypeIndex}">
+                    SelectedIndex="{Binding SelectedTypeIndex}"
+                    AutomationId="DataTypePicker">
                 <Picker.Items>
                     <x:String>LifeSign Only</x:String>
                     <x:String>Non-LifeSign Only</x:String>
@@ -76,11 +81,13 @@
                             Placeholder="{Binding ConnStrJsonPlaceHolder}"
                             PlaceholderColor="DimGray"
                             FontFamily="Courier-New"
-                            VerticalOptions="FillAndExpand"/>
+                            VerticalOptions="FillAndExpand"
+                            AutomationId="JsonStrEditor"/>
                     <Button Text="Validate &amp; Save"
                             BackgroundColor="BlueViolet" TextColor="FloralWhite"
                             Command="{Binding SaveConfigCommand}"
-                            CommandParameter="{Binding ConnStrJson}"/>
+                            CommandParameter="{Binding ConnStrJson}"
+                            AutomationId="ValidateButton"/>
                 </StackLayout>
             </Frame>
 
@@ -97,14 +104,16 @@
                        HorizontalOptions="Start"
                        VerticalOptions="Start"
                        TextColor="DeepSkyBlue"
-                       FontAttributes="Italic"/>
+                       FontAttributes="Italic"
+                       AutomationId="KMLInfoLabel"/>
                 <StackLayout Grid.Row="1" 
                              HorizontalOptions="Center" VerticalOptions="Center">
                     <ActivityIndicator Color="Red" IsRunning="{Binding IsBusy}"/>
                     <Button Text="{Binding ExecuteButtonText}" 
                             FontSize="Large" BackgroundColor="LavenderBlush" 
                             Command="{Binding ExecuteCommand}"
-                            IsEnabled="{Binding CanExecuteWriting}"/>
+                            IsEnabled="{Binding CanExecuteWriting}"
+                            AutomationId="ExecuteButton"/>
                 </StackLayout>
                 <Label Text="{Binding TimerText}"
                        Grid.Row="2"

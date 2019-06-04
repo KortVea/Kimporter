@@ -25,7 +25,8 @@
                     HorizontalOptions="End"
                     BackgroundColor="LightYellow"
                     Margin="8"
-                    Command="{Binding ClearLogCommand}"/>
+                    Command="{Binding ClearLogCommand}"
+                    AutomationId="ClearLogButton"/>
         </StackLayout>
     </ContentPage.Content>
 </ContentPage>
