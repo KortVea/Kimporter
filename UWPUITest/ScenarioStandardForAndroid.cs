@@ -1,20 +1,23 @@
-﻿using System;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OpenQA.Selenium.Appium.Android;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OpenQA.Selenium.Appium.Windows;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace UWPUITest
 {
     [TestClass]
-    public class ScenarioStandard : KSession
+    public class ScenarioStandardForAndroid : KSessionForAndroid
     {
-        private static WindowsElement openBtn;
-        private static WindowsElement manageBtn;
-        private static WindowsElement historyBtn;
-        private static WindowsElement typePicker;
-        private static WindowsElement dataTypePicker;
-        private static WindowsElement jsonEditor => session.FindElementByAccessibilityId("JsonStrEditor");
-        private static WindowsElement validateBtn => session.FindElementByAccessibilityId("ValidateButton");
+        private static AndroidElement openBtn;
+        private static AndroidElement manageBtn;
+        private static AndroidElement historyBtn;
+        private static AndroidElement typePicker;
+        private static AndroidElement dataTypePicker;
+        private static AndroidElement jsonEditor => session.FindElementByAccessibilityId("JsonStrEditor");
+        private static AndroidElement validateBtn => session.FindElementByAccessibilityId("ValidateButton");
 
         [ClassInitialize]
         public static void ClassInitialise(TestContext context)
@@ -24,7 +27,6 @@ namespace UWPUITest
             {
                 openBtn = session.FindElementByAccessibilityId("OpenButton");
                 Assert.AreEqual("Open ...", openBtn.Text);
-                
                 manageBtn = session.FindElementByAccessibilityId("ManageButton");
                 Assert.IsNotNull(manageBtn);
                 historyBtn = session.FindElementByAccessibilityId("HistoryButton");
@@ -97,7 +99,6 @@ namespace UWPUITest
             var expected = "Both";
             dataTypePicker.SendKeys(expected);
             Assert.AreEqual(expected, dataTypePicker.Text);
-
         }
     }
 }
