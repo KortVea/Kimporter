@@ -13,28 +13,24 @@ namespace UWPUITest
 
         public static void SetUp(TestContext context)
         {
-            if (session == null)
+            if (session != null) return;
+            var rawMap = new Dictionary<string, object>();
+            foreach (var item in Config.Default.UWP)
             {
-                Dictionary<string, object> rawMap = new Dictionary<string, object>();
-                foreach (var item in Config.Default.UWP)
-                {
-                    rawMap.Add(item.Key, item.Value);
-                }
-                DesiredCapabilities appCapabilities = new DesiredCapabilities(rawMap);
-                session = new WindowsDriver<WindowsElement>(new Uri(Config.Default.WindowsDriverUrl), appCapabilities);
-                Assert.IsNotNull(session);
-
-                session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(Config.Default.Element_Search_Timeout));
+                rawMap.Add(item.Key, item.Value);
             }
+            var appCapabilities = new DesiredCapabilities(rawMap);
+            session = new WindowsDriver<WindowsElement>(new Uri(Config.Default.WindowsDriverUrl), appCapabilities);
+            Assert.IsNotNull(session);
+
+            session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(Config.Default.Element_Search_Timeout));
         }
 
         public static void TearDown()
         {
-            if (session != null)
-            {
-                session.Quit();
-                session = null;
-            }
+            if (session == null) return;
+            session.Quit();
+            session = null;
         }
     }
 }
