@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace DataProcessor
 {
-    public class KMLParsor : IKMLParosr
+    public class KMLParser : IKMLParser
     {
         public async Task<IEnumerable<DownloadedTraceData>> Parse(Stream stream)
         {
@@ -23,7 +23,7 @@ namespace DataProcessor
                 var root = (Kml)parser.Root;
                 var doc = (Document)root.Feature;
                 var pointsFolder = (Folder)doc.Features.FirstOrDefault(f => f.Name == "Trace points");
-                var trace = pointsFolder?.Features.OfType<Placemark>().Select(i => TransformPlacemarkIntoTrace(i));
+                var trace = pointsFolder?.Features.OfType<Placemark>().Select(TransformPlacemarkIntoTrace);
                 return trace ?? new List<DownloadedTraceData>();
             });
         }
@@ -31,7 +31,7 @@ namespace DataProcessor
         private DownloadedTraceData TransformPlacemarkIntoTrace(Placemark pm)
         {
             var description = HTMLStringParsor.Parse(pm.Description.Text);
-            List<DownloadedPropertyData> propData = new List<DownloadedPropertyData>();
+            var propData = new List<DownloadedPropertyData>();
             var traceDataId = Guid.NewGuid();
             if (description.DownloadedPropertyData.Count > 0)
             {
@@ -52,9 +52,9 @@ namespace DataProcessor
                 Type = description.Type,
                 Time = description.Time,
                 Source = $"{description.EquipmentId},???,UKN",
-                Latitude = (pm.Geometry as Point).Coordinate.Latitude,
-                Longitude = (pm.Geometry as Point).Coordinate.Longitude,
-                Milage = description.Milage,
+                Latitude = (pm.Geometry as Point)?.Coordinate.Latitude,
+                Longitude = (pm.Geometry as Point)?.Coordinate.Longitude,
+                Milage = description.Mileage,
                 MilageSpecified = true,
                 Heading = Utilities.OrientationToHeading(description.Orientation),
                 HeadingSpecified = true,

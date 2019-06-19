@@ -11,14 +11,14 @@ namespace TestDataProcessor.Parsors
 {
     public class TestKMLParsor: TestBase
     {
-        private IKMLParosr parsor;
+        private IKMLParser parsor;
         private string pathToCorrect;
         private string pathToWrong;
 
         [SetUp]
         public void Setup()
         {
-            parsor = new KMLParsor();
+            parsor = new KMLParser();
         }
 
         [TestCase(@"Inputs\KML_Samples.kml")]

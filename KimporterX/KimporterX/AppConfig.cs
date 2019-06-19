@@ -15,8 +15,8 @@ namespace KimporterX
         {
             //IOC
             FreshIOC.Container.Register<ITraceRepo<DownloadedTraceData>, TraceRepo>();
-            FreshIOC.Container.Register<IKMLParosr, KMLParsor>();
-            FreshIOC.Container.Register<IConnStrJsonParsor, ConnStrJsonParsor>();
+            FreshIOC.Container.Register<IKMLParser, KMLParser>();
+            FreshIOC.Container.Register<IConnStrJsonParser, ConnStrJsonParser>();
         }
 
     }

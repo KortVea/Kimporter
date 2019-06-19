@@ -15,7 +15,7 @@ namespace DataProcessor.DAL
     {
         public async Task<IEnumerable<DownloadedTraceData>> GetFullTraces(string connStr = null)
         {
-            ConnStr = connStr == null ? ConnStr : connStr;
+            ConnStr = connStr ?? ConnStr;
             string sql = $@"SELECT * FROM {nameof(DownloadedTraceData)} AS A 
                          LEFT JOIN {nameof(DownloadedPropertyData)} AS B 
                          ON B.TraceDataId = A.Id";
@@ -27,8 +27,7 @@ namespace DataProcessor.DAL
                     sql,
                     (trace, property) =>
                     {
-                        DownloadedTraceData traceEntry;
-                        if (!tracePropDic.TryGetValue(trace.Id, out traceEntry))
+                        if (!tracePropDic.TryGetValue(trace.Id, out var traceEntry))
                         {
                             traceEntry = trace;
                             traceEntry.DownloadedPropertyData = new List<DownloadedPropertyData>();
@@ -45,7 +44,7 @@ namespace DataProcessor.DAL
         public async Task InsertTracesAndPropsWhileIgnoringSameHash(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null,
                                                                     bool eagerLoadingHash = true, DateTime? end = null, string connStr = null)
         {
-            ConnStr = connStr == null ? ConnStr : connStr;
+            ConnStr = connStr ?? ConnStr;
             if (eagerLoadingHash)
             {
                 await InsertWithQueryAllFirst(list, progress, end);
@@ -213,7 +212,7 @@ namespace DataProcessor.DAL
         public async Task<IEnumerable<DownloadedTraceData>> InsertWithInMemoryCheck(IEnumerable<DownloadedTraceData> list, IProgress<DbProgressInfo> progress = null, 
                                                                                     DateTime? end = null, string connStr = null)
         {
-            ConnStr = connStr == null ? ConnStr : connStr;
+            ConnStr = connStr ?? ConnStr;
 
             var completedList = new List<DownloadedTraceData>();
             var tempCount = 0;
@@ -269,7 +268,7 @@ namespace DataProcessor.DAL
                             progress?.Report(new DbProgressInfo
                             {
                                 ProgressType = ProgressType.Default,
-                                Message = $"Error writing {item.ToString()}"
+                                Message = $"Error writing {item}"
                             });
                             throw;
                         }

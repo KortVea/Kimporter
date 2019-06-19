@@ -2,7 +2,7 @@
 
 namespace DataProcessor.Interfaces
 {
-    public interface IConnStrJsonParsor
+    public interface IConnStrJsonParser
     {
         Dictionary<string, string> Parse(string str);
     }

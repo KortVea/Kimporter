@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace DataProcessor
 {
-    public class ConnStrJsonParsor : IConnStrJsonParsor
+    public class ConnStrJsonParser : IConnStrJsonParser
     {
         public Dictionary<string, string> Parse(string str)
         {

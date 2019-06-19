@@ -18,14 +18,14 @@ namespace KimporterX
 {
     public class MainPageModel : FreshBasePageModel
     {
-        private ITraceRepo<DownloadedTraceData> _traceRepo;
-        private IKMLParosr _kmlParsor;
-        private IConnStrJsonParsor _connStrJsonParsor;
-        public MainPageModel(ITraceRepo<DownloadedTraceData> traceRepo, IKMLParosr kMLParosr, IConnStrJsonParsor connStrJsonParsor)
+        private readonly ITraceRepo<DownloadedTraceData> _traceRepo;
+        private readonly IKMLParser _kmlParser;
+        private readonly IConnStrJsonParser _connStrJsonParser;
+        public MainPageModel(ITraceRepo<DownloadedTraceData> traceRepo, IKMLParser kMLParser, IConnStrJsonParser connStrJsonParser)
         {
             _traceRepo = traceRepo;
-            _kmlParsor = kMLParosr;
-            _connStrJsonParsor = connStrJsonParsor;
+            _kmlParser = kMLParser;
+            _connStrJsonParser = connStrJsonParser;
 
             IsManaging = false;
             ResetControls();
@@ -76,7 +76,7 @@ namespace KimporterX
             try
             {
                 var str = input as string;
-                connStrDictionary = _connStrJsonParsor.Parse(str);
+                connStrDictionary = _connStrJsonParser.Parse(str);
                 await BlobCache.Secure.InsertObject(App.ConnStrDic, connStrDictionary, TimeSpan.FromDays(56));
                 await BlobCache.Secure.InsertObject(App.JsonStrKey, ConnStrJson, TimeSpan.FromDays(56));
             }
@@ -171,7 +171,7 @@ namespace KimporterX
                 default:
                     break;
             }
-            if (dataToWrite.Count() == 0 && !IsBusy)
+            if (!dataToWrite.Any() && !IsBusy)
             {
                 ExecuteButtonText += "\nExecution ended";
 
@@ -196,10 +196,10 @@ namespace KimporterX
                 fileName = fileData.FileName;
 
                 IsBusy = true;
-                kmlTraceData = await _kmlParsor.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
+                kmlTraceData = await _kmlParser.Parse(fileData.GetStream()).ContinueWith(i => i.Result.ToList());
                 IsBusy = false;
 
-                if (kmlTraceData.Count() <= 0)
+                if (!kmlTraceData.Any())
                 {
                     await CoreMethods.DisplayAlert("File Contents", "No trace data were found from the file. Looking for Folder \"Trace points\" and Placemark tags.", "OK");
                 }
@@ -280,9 +280,9 @@ namespace KimporterX
 //0. Privacy Setting - File System - this app is enabled
 //1. DownloadedTraceData table and DownloadedPropertyData table are created according to their 
 //schemas on your local SQL server.
-//2. Protocols for SQLEXPRESS is installed in Computer Management brower, and its TCP/IP protoal 
+//2. Protocols for SQLEXPRESS is installed in Computer Management browser, and its TCP/IP protocol 
 is enabled
-//3. SQL Server Brower is running in Service brower
+//3. SQL Server Browser is running in Service browser
 
 //reference: https://docs.microsoft.com/en-us/windows/uwp/data-access/sql-server-databases#trouble-connecting-to-your-database";
 

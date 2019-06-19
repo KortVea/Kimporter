@@ -2,12 +2,12 @@
 
 namespace DataProcessor.Helpers
 {
-    internal static class InnerTextExtention
+    internal static class InnerTextExtension
     {
         internal static string TrimInnerText(this string input)
         {
             input = input.Trim();
-            var ptn = @"\r\n\s+";
+            const string ptn = @"\r\n\s+";
             return Regex.Replace(input, ptn, " ");
         }
     }

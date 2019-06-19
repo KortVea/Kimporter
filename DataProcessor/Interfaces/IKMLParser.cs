@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DataProcessor.Interfaces
 {
-    public interface IKMLParosr
+    public interface IKMLParser
     {
         Task<IEnumerable<DownloadedTraceData>> Parse(Stream stream);
     }

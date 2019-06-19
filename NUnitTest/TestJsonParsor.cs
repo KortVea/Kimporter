@@ -10,26 +10,26 @@ namespace TestDataProcessor.Parsors
     [TestFixture]
     public class TestJsonParsor: TestBase
     {
-        private IConnStrJsonParsor parsor;
+        private IConnStrJsonParser _parser;
 
         [SetUp]
         public void Setup()
         {
-            parsor = new ConnStrJsonParsor();
+            _parser = new ConnStrJsonParser();
         }
 
         [TestCase("", ExpectedResult = 0, Description ="Correct JSON syntax")]
         [TestCase("{'a x':'b', 'c()':'d'}", ExpectedResult = 2, Description = "Correct JSON syntax")]
         public int JsonParsorToDicCorrectSyntax(string input)
         {
-            return parsor.Parse(input).Count;
+            return _parser.Parse(input).Count;
         }
 
         
         [TestCase("['a':'b']")]
         public void JsonParsorToDicWrongSyntaxJsonSerializationException(string input)
         {
-            Assert.Throws<JsonSerializationException>(() => parsor.Parse(input));
+            Assert.Throws<JsonSerializationException>(() => _parser.Parse(input));
             
         }
 
@@ -37,7 +37,7 @@ namespace TestDataProcessor.Parsors
         [TestCase("x")]
         public void JsonParsorToDicWrongSyntaxJsonReaderException(string input)
         {
-            Assert.Throws<JsonReaderException>(() => parsor.Parse(input));
+            Assert.Throws<JsonReaderException>(() => _parser.Parse(input));
 
         }
 

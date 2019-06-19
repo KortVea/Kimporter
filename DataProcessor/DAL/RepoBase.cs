@@ -10,11 +10,11 @@ namespace DataProcessor.DAL
 {
     public class RepoBase<T>: IRepoBase<T> where T : EntityBase
     {
-        public string ConnStr { get; set; } = String.Empty;
+        public string ConnStr { get; set; } = string.Empty;
 
         public async Task<int> InsertAllAsync(IEnumerable<T> list, string connStr = null)
         {
-            ConnStr = connStr == null ? ConnStr : connStr;
+            ConnStr = connStr ?? ConnStr;
             using (var conn = new SqlConnection(ConnStr))
             {
                 await conn.OpenAsync();
@@ -37,7 +37,7 @@ namespace DataProcessor.DAL
 
         public async Task<IEnumerable<T>> GetAllAsync(string connStr = null)
         {
-            ConnStr = connStr == null ? ConnStr : connStr;
+            ConnStr = connStr ?? ConnStr;
             using (var conn = new SqlConnection(ConnStr))
             {
                 var traces = await conn.GetAllAsync<T>();

@@ -24,7 +24,7 @@ namespace DataProcessor.Models
         public float Speed { get; set; }
 
         [JsonProperty(PropertyName = "Mileage(mi)")]
-        public float Milage { get; set; }
+        public float Mileage { get; set; }
 
         [JsonProperty(PropertyName = "Orientation")]
         public string Orientation { get; set; }
